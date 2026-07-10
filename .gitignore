@@ -1,0 +1,9 @@
+node_modules
+.next
+ndev
+ndist
+nyarn-error.log
+npnpm-lock.yaml
+.DS_Store
+n*.log
+n

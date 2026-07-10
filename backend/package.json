@@ -1,0 +1,22 @@
+{
+  "name": "tech-with-tanziya-backend",
+  "version": "1.0.0",
+  "description": "Backend API for TechWithTanziya",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "prod": "NODE_ENV=production node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "google-auth-library": "^9.0.0",
+    "googleapis": "^118.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

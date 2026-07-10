@@ -1,0 +1,33 @@
+digraph TechWithTanziya {
+  rankdir=LR;
+  labelloc="t";
+  label="TechWithTanziya — Project Overview";
+  node [shape=box, style=filled, fillcolor="#f3f4f6", fontname="Arial"];
+
+  app [label="app/\n• layout.tsx (metadata)\n• page.tsx (home)\n• globals.css (styles)\n• route folders: about, cheatsheets, blog, projects, resources, roadmaps", fillcolor="#e6f0ff"];
+  components [label="components/\n• Navigation.tsx (client, theme toggle)\n• Footer.tsx\n• SectionHeading.tsx", fillcolor="#fff0db"];
+  data [label="data/\n• content.ts (static content arrays: navLinks, cheatSheets, blogs, projects, resources, roadmaps)", fillcolor="#e8ffe6"];
+  types [label="types/\n• content.ts (TypeScript types for content shapes)", fillcolor="#fff0f0"];
+  public [label="public/\n• logo.svg + static assets (served as /)", fillcolor="#fef3f3"];
+  config [label="config & manifest\n• package.json (next, react, scripts)\n• tsconfig.json (strict TS)\n• next-env.d.ts\n• README.md", fillcolor="#f3f4f6"];
+  scripts [label="Scripts\n• npm run dev (next dev)\n• npm run build\n• npm run start\n• npm run lint", fillcolor="#f8f0ff"];
+  languages [label="Languages & Tech\n• TypeScript (primary)\n• React / Next.js (app router)\n• CSS (globals.css)\n• HTML (JSX/TSX)", fillcolor="#f0fff6"];
+  runtime [label="Runtime / Hosting\n• Node.js (server)\n• Host: Vercel / any Node host (recommended)", fillcolor="#f0f7ff"];
+
+  /* relationships */
+  config -> app [label="sets build & metadata"];
+  data -> app [label="feeds static pages"];
+  types -> app [label="type checks for data"];
+  components -> app [label="used by pages"];
+  public -> app [label="static assets"];
+  scripts -> config [label="defined in"];
+  languages -> app;
+  runtime -> scripts;
+
+  /* notes */
+  note1 [label="Content workflow: edit data/content.ts or move to Markdown/CMS for non-dev authors", shape=note, fillcolor="#fffde7"];
+  note2 [label="Dev flow: npm install -> npm run dev (http://localhost:3000)"] , shape=note, fillcolor="#fffde7";
+
+  note1 -> data [style=dashed];
+  note2 -> scripts [style=dashed];
+}

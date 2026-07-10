@@ -1,0 +1,79 @@
+Project: TechWithTanziya
+Date: 2026-07-08
+
+1) Purpose
+- Content-first learning platform presenting cheat sheets, blog posts, projects, roadmaps, and resources for learners.
+
+2) Languages & Frameworks
+- TypeScript: primary language across the codebase.
+- React: UI library used via Next.js.
+- Next.js (App Router): application framework (Next.js v15 noted in package.json).
+- CSS: global styling in `app/globals.css`.
+- HTML via JSX/TSX templates.
+
+3) Top-level structure
+- app/ : Next.js app routes and pages. Key files:
+  - app/layout.tsx : root layout and page metadata
+  - app/page.tsx : landing page (home)
+  - app/globals.css : global styles
+  - route folders: about, cheatsheets, blog, projects, resources, roadmaps
+- components/ : React components
+  - Navigation.tsx : header, theme toggle (client component)
+  - Footer.tsx
+  - SectionHeading.tsx
+- data/ : static content
+  - content.ts : navigation links, cheatSheets, blogs, projects, resources, roadmaps
+- types/ : TypeScript type definitions
+  - content.ts : CheatSheet, BlogPost, Project, Resource, Roadmap
+- public/ : static assets (logo.svg, images)
+- package.json : dependencies & scripts
+- tsconfig.json : TypeScript configuration
+- README.md : project description and basic instructions
+
+4) Key implementation details
+- Static content is authored in `data/content.ts` as typed arrays. Pages map over these arrays to render lists.
+- `Navigation` uses `useEffect` + `localStorage` to persist theme (`twt-theme`) and toggles dark mode by adding the `dark` class to `document.documentElement`.
+- Code samples in the homepage are rendered as literal text (template strings escaped) to avoid execution during server render.
+- App uses server components by default; interactive UI elements are marked `'use client'`.
+
+5) Development workflow
+- Install dependencies: `npm install`
+- Run dev server: `npm run dev` → http://localhost:3000
+- Build for production: `npm run build`
+- Start production server: `npm run start`
+- Linting: `npm run lint`
+
+6) Recommended content management
+- For single-developer or small static site: keep using `data/content.ts` with TypeScript types.
+- For non-developer authors or growing content: migrate content to Markdown files under `content/` or adopt a CMS (Sanity, Contentful, Netlify CMS). Render MD with a parser (remark) or Next.js MDX.
+
+7) Testing & CI suggestions
+- Add unit tests with Jest + React Testing Library for critical components.
+- Add E2E tests with Playwright or Cypress for major flows (landing, cheatsheet pages, blog route).
+- Add CI (GitHub Actions) to run `npm ci`, `npm run lint`, `npm run build`, and tests on PRs.
+
+8) Deployment recommendations
+- Host on Vercel for zero-config Next.js deployments. Alternately, use Netlify or any Node hosting.
+- Ensure `metadataBase` or absolute URLs are configured in `app/layout.tsx` for OG images in production.
+
+9) Maintenance notes
+- Keep `types/content.ts` synchronized with `data/content.ts` when adding fields.
+- Keep CSS modular and consider moving repeated styles to CSS modules or Tailwind if you prefer utility-first.
+- Review `package.json` dependency versions periodically (Next.js, React, TypeScript).
+
+10) Useful file list
+- `app/layout.tsx`  `app/page.tsx`  `app/globals.css`
+- `components/Navigation.tsx`  `components/Footer.tsx`  `components/SectionHeading.tsx`
+- `data/content.ts`  `types/content.ts`
+- `package.json`  `tsconfig.json`  `README.md`
+- `project-structure.dot` (Graphviz summary)
+
+11) Quick commands
+- Install: `npm install`
+- Dev: `npm run dev`
+- Build: `npm run build`
+- Start: `npm run start`
+- Lint: `npm run lint`
+
+---
+If you want this saved as Markdown instead, or appended to `README.md`, I can do that next. Also can add a GitHub Actions workflow or convert `data/content.ts` into Markdown files for easier content editing.
