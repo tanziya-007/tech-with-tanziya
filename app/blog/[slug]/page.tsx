@@ -186,8 +186,7 @@ export default function BlogDetailPage({ params: paramsPromise }: PageProps) {
       }
     };
 
-    fetchData();
-  }, [params.slug]);
+    const checkImage = async () => {
       try {
         const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
         
@@ -208,6 +207,7 @@ export default function BlogDetailPage({ params: paramsPromise }: PageProps) {
       }
     };
 
+    fetchData();
     checkImage();
   }, [params.slug]);
 

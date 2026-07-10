@@ -146,12 +146,4 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function GET_METADATA(request: NextRequest) {
-  try {
-    await ensureDir();
-    const metadata = await getMetadata();
-    return NextResponse.json(metadata);
-  } catch (error) {
-    return NextResponse.json({});
-  }
-}
+
