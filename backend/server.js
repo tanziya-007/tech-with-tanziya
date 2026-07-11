@@ -10,9 +10,24 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }));
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => console.error('❌ MongoDB connection error:', err.message));
+} else {
+  console.warn('⚠️  MONGODB_URI not configured. Database features will not work.');
+  console.warn('📝 Please set MONGODB_URI in .env file');
+  console.warn('📚 Get a free MongoDB cluster at: https://www.mongodb.com/cloud/atlas');
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Backend server is running',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Cheat Sheets
 app.get('/api/cheatsheets', async (req, res) => {
@@ -105,4 +120,8 @@ app.get('/api/roadmaps/:slug', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`\n🚀 Server running on port ${PORT}`);
+  console.log(`📍 API Base URL: http://localhost:${PORT}/api`);
+  console.log(`💚 Health Check: http://localhost:${PORT}/api/health\n`);
+});
