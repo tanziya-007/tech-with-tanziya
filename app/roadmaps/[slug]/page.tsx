@@ -1,282 +1,80 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { use } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
-import { roadmaps } from '@/data/content';
 
-type PageProps = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+type PageProps = { params: Promise<{ slug: string }> };
 
 const styles = `
-.roadmap-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 40px 0;
-}
-
-.roadmap-header {
-  max-width: 760px;
-  margin-bottom: 36px;
-}
-
-.badge {
-  display: inline-block;
-  padding: 8px 16px;
-  background: #EEF2FF;
-  color: #6C3BFF;
-  border-radius: 50px;
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 16px;
-}
-
-.roadmap-header h1 {
-  font-size: 2.75rem;
-  margin: 18px 0 12px;
-  font-family: Poppins, sans-serif;
-  color: #111827;
-}
-
-.roadmap-header p {
-  color: #6B7280;
-  font-size: 1.05rem;
-}
-
-.image-section {
-  margin-bottom: 40px;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  background: #f9fafb;
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.image-section img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.no-image {
-  color: #9CA3AF;
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.steps-section {
-  background: white;
-  border-radius: 16px;
-  padding: 40px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  margin-bottom: 40px;
-}
-
-.steps-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 30px;
-  color: #111827;
-}
-
-.steps-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.step-item {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border-left: 4px solid #6C3BFF;
-  transition: 0.3s;
-}
-
-.step-item:hover {
-  background: #f3f4f6;
-  transform: translateX(4px);
-}
-
-.step-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #6C3BFF, #2D7DFF);
-  color: white;
-  border-radius: 50%;
-  font-weight: 700;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.step-content {
-  flex: 1;
-}
-
-.step-content h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 8px;
-}
-
-.step-content p {
-  color: #6B7280;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.content-section {
-  background: white;
-  border-radius: 16px;
-  padding: 40px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  margin-bottom: 40px;
-  line-height: 1.8;
-  color: #555;
-}
-
-.content-section h2 {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: #111827;
-}
-
-.content-section p {
-  margin-bottom: 16px;
-}
-
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 40px;
-}
-
-.button {
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: 0.3s;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.button-primary {
-  background: linear-gradient(135deg, #6C3BFF, #2D7DFF);
-  color: white;
-  box-shadow: 0 4px 15px rgba(108, 59, 255, 0.3);
-}
-
-.button-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(108, 59, 255, 0.4);
-}
-
-.button-secondary {
-  border: 2px solid #6C3BFF;
-  background: white;
-  color: #6C3BFF;
-  font-weight: 700;
-}
-
-.button-secondary:hover {
-  background: #f5f3ff;
-}
-
-.back-link {
-  margin-top: 50px;
-}
-
+.roadmap-container { max-width: 900px; margin: 0 auto; padding: 40px 0; }
+.badge { display: inline-block; padding: 8px 16px; background: #EEF2FF; color: #6C3BFF; border-radius: 50px; font-size: 13px; font-weight: 700; margin-bottom: 16px; }
+.roadmap-header { margin-bottom: 36px; }
+.roadmap-header h1 { font-size: 2.75rem; margin: 18px 0 12px; font-family: Poppins, sans-serif; color: #111827; }
+.roadmap-header p { color: #6B7280; font-size: 1.05rem; line-height: 1.7; }
+.image-section { margin-bottom: 40px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #f9fafb; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+.image-section img { width: 100%; height: auto; display: block; }
+.no-image { color: #9CA3AF; text-align: center; padding: 60px 20px; }
+.action-buttons { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 40px; }
+.button { padding: 14px 32px; border-radius: 12px; font-weight: 600; transition: 0.3s; text-decoration: none; border: none; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; }
+.button-primary { background: linear-gradient(135deg, #6C3BFF, #2D7DFF); color: white; box-shadow: 0 4px 15px rgba(108,59,255,0.3); }
+.button-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(108,59,255,0.4); }
+.button-secondary { border: 2px solid #6C3BFF; background: white; color: #6C3BFF; font-weight: 700; }
+.button-secondary:hover { background: #f5f3ff; }
+.back-link { margin-top: 50px; }
 @media(max-width: 900px) {
-  .roadmap-header h1 {
-    font-size: 2rem;
-  }
-
-  .steps-section,
-  .content-section {
-    padding: 25px;
-  }
-
-  .step-item {
-    flex-direction: column;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .button {
-    width: 100%;
-  }
+  .roadmap-header h1 { font-size: 2rem; }
+  .action-buttons { flex-direction: column; }
+  .button { width: 100%; justify-content: center; }
 }
 `;
 
-export default function RoadmapDetailPage({ params: paramsPromise }: PageProps) {
-  const params = use(paramsPromise);
-  const roadmap = roadmaps.find((item) => item.slug === params.slug);
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [imageExists, setImageExists] = useState(false);
+export default function RoadmapDetailPage({ params }: PageProps) {
+  const { slug } = use(params);
+  const [roadmap, setRoadmap] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [notFoundState, setNotFoundState] = useState(false);
+  const [folderImages, setFolderImages] = useState<any[]>([]);
+  const [folderLoading, setFolderLoading] = useState(false);
+  const [folderError, setFolderError] = useState('');
 
   useEffect(() => {
-    const checkImage = async () => {
-      try {
-        const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
-        
-        for (const ext of extensions) {
-          const url = `/uploads/roadmaps/${params.slug}.${ext}`;
-          const response = await fetch(url, { method: 'HEAD' });
-          
-          if (response.ok) {
-            setImageUrl(url);
-            setImageExists(true);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('No image found for this roadmap');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetch(`${API}/roadmaps/${slug}`)
+      .then(res => { if (!res.ok) { setNotFoundState(true); return null; } return res.json(); })
+      .then(data => { if (data) setRoadmap(data); })
+      .catch(() => setNotFoundState(true))
+      .finally(() => setLoading(false));
+  }, [slug]);
 
-    checkImage();
-  }, [params.slug]);
-
-  if (!roadmap) {
-    notFound();
-  }
-
-  const handleDownload = () => {
-    if (imageUrl) {
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = `${roadmap.title}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  useEffect(() => {
+    if (!roadmap?.googleDriveFolderId) {
+      setFolderImages([]);
+      setFolderError('');
+      return;
     }
-  };
+    setFolderLoading(true);
+    setFolderError('');
+    fetch(`${API}/drive/folders/${roadmap.googleDriveFolderId}/images`)
+      .then(async res => {
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Unable to load folder images');
+        }
+        return res.json();
+      })
+      .then(data => setFolderImages(data || []))
+      .catch(error => {
+        setFolderImages([]);
+        setFolderError(error.message);
+      })
+      .finally(() => setFolderLoading(false));
+  }, [roadmap?.googleDriveFolderId]);
+
+  if (!loading && notFoundState) notFound();
 
   return (
     <>
@@ -285,77 +83,32 @@ export default function RoadmapDetailPage({ params: paramsPromise }: PageProps) 
         <Navigation />
         <section>
           <div className="container roadmap-container">
-            <div className="roadmap-header">
-              <p className="badge">Roadmap</p>
-              <h1>{roadmap.title}</h1>
-              <p>{roadmap.description}</p>
-            </div>
+            {loading && <p style={{ color: '#9CA3AF', textAlign: 'center', padding: '80px 0' }}>Loading...</p>}
+            {!loading && roadmap && (
+              <>
+                <div className="roadmap-header">
+                  <p className="badge">Roadmap</p>
+                  <h1>{roadmap.title}</h1>
+                  {roadmap.description && <p>{roadmap.description}</p>}
+                </div>
 
-            {!loading && (
-              <div className="image-section">
-                {imageExists && imageUrl ? (
-                  <img src={imageUrl} alt={roadmap.title} />
-                ) : (
-                  <div className="no-image">
-                    <p>🗺️ No roadmap image uploaded yet</p>
-                    <p style={{ fontSize: '14px', marginTop: '8px' }}>
-                      Admin can upload an image from the Roadmap Upload panel
-                    </p>
-                  </div>
-                )}
-              </div>
+                <div className="image-section">
+                  {folderLoading ? (
+                    <div className="no-image"><p>Loading images from folder...</p></div>
+                  ) : folderError ? (
+                    <div className="no-image"><p>{folderError}</p></div>
+                  ) : folderImages.length ? (
+                    <img src={folderImages[0].thumbnailUrl} alt={roadmap.title} />
+                  ) : (
+                    <div className="no-image"><p>No roadmap image found in folder</p></div>
+                  )}
+                </div>
+
+                <div className="action-buttons">
+                  <Link href="/roadmaps" className="button button-secondary">← Back to Roadmaps</Link>
+                </div>
+              </>
             )}
-
-            {loading && (
-              <div className="image-section">
-                <div className="no-image">Loading...</div>
-              </div>
-            )}
-
-            <div className="steps-section">
-              <h2 className="steps-title">Learning Path</h2>
-              <div className="steps-list">
-                {roadmap.steps.map((step, index) => (
-                  <div key={index} className="step-item">
-                    <div className="step-number">{index + 1}</div>
-                    <div className="step-content">
-                      <h3>{step}</h3>
-                      <p>Master this step before moving to the next level. Take your time to understand the concepts thoroughly.</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="content-section">
-              <h2>About This Roadmap</h2>
-              <p>
-                This roadmap provides a structured learning path to help you progress from beginner to advanced level. 
-                Each step builds upon the previous one, ensuring a solid foundation before moving forward.
-              </p>
-              
-              <h2 style={{ marginTop: '30px' }}>How to Use This Roadmap</h2>
-              <p>
-                Follow the steps in order and spend adequate time on each phase. Don't rush through the content. 
-                Practice with real projects and reinforce your learning. Remember, consistency is key to mastering 
-                any skill. Revisit earlier steps whenever needed to strengthen your foundation.
-              </p>
-            </div>
-
-            <div className="action-buttons">
-              {imageExists && imageUrl && (
-                <button className="button button-primary" onClick={handleDownload}>
-                  ⬇️ Download Roadmap
-                </button>
-              )}
-              <button className="button button-secondary">📤 Share</button>
-            </div>
-
-            <div className="back-link">
-              <Link href="/roadmaps" className="button button-secondary">
-                ← Back to Roadmaps
-              </Link>
-            </div>
           </div>
         </section>
         <Footer />

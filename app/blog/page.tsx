@@ -6,7 +6,6 @@ import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/SectionHeading";
 import { fetchBlogs } from "@/lib/api";
-import { blogs } from "@/data/content";
 
 const styles = `
 .blogs-page { 
@@ -127,23 +126,14 @@ const styles = `
 `;
 
 export default function BlogPage() {
-  const [blogPosts, setBlogPosts] = useState(blogs);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchBlogs();
-        setBlogPosts(data);
-      } catch (error) {
-        console.log('Using fallback blog data');
-        setBlogPosts(blogs);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchBlogs()
+      .then(data => setBlogPosts(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -159,6 +149,10 @@ export default function BlogPage() {
               description="Explore programming tutorials, study plans, interview tips and learning experiences."
             />
 
+            {loading && <p style={{ textAlign: 'center', color: '#9CA3AF' }}>Loading...</p>}
+            {!loading && blogPosts.length === 0 && (
+              <p style={{ textAlign: 'center', color: '#9CA3AF' }}>No blog posts published yet.</p>
+            )}
             <div className="cards">
               {blogPosts.map((blog) => (
                 <Link
@@ -171,7 +165,7 @@ export default function BlogPage() {
                     <h3>{blog.title}</h3>
                     <p>{blog.description}</p>
                     <div className="blog-footer">
-                      <span>{blog.date}</span>
+                      <span>{new Date(blog.date).toLocaleDateString()}</span>
                       <span className="read-blog">Read Blog →</span>
                     </div>
                   </div>
