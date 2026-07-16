@@ -10,7 +10,23 @@ const { listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFol
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }));
+// CORS: allow a comma-separated list via CORS_ORIGIN, e.g.
+// CORS_ORIGIN="http://localhost:3000,https://tech-with-tanziya-rg1z.vercel.app"
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow non-browser (server-to-server) requests when origin is undefined
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 // ================================
