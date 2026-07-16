@@ -1,9 +1,15 @@
 node_modules
 .next
-ndev
-ndist
-nyarn-error.log
-npnpm-lock.yaml
+dist
+yarn-error.log
+pnpm-lock.yaml
 .DS_Store
-n*.log
-n
+*.log
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Google service account credentials
+backend/credentials/

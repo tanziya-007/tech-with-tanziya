@@ -1,0 +1,66 @@
+// Maps common tech names/slugs to their devicons slug
+const devIconMap: Record<string, string> = {
+  python: 'python',
+  java: 'java',
+  javascript: 'javascript',
+  js: 'javascript',
+  typescript: 'typescript',
+  ts: 'typescript',
+  react: 'react',
+  nextjs: 'nextjs',
+  'next.js': 'nextjs',
+  nodejs: 'nodejs',
+  'node.js': 'nodejs',
+  node: 'nodejs',
+  express: 'express',
+  html: 'html5',
+  html5: 'html5',
+  css: 'css3',
+  css3: 'css3',
+  sql: 'mysql',
+  mysql: 'mysql',
+  postgresql: 'postgresql',
+  postgres: 'postgresql',
+  mongodb: 'mongodb',
+  git: 'git',
+  'git and github': 'git',
+  'git-and-github': 'git',
+  github: 'github',
+  docker: 'docker',
+  linux: 'linux',
+  bash: 'bash',
+  c: 'c',
+  'c++': 'cplusplus',
+  cpp: 'cplusplus',
+  'c#': 'csharp',
+  csharp: 'csharp',
+  php: 'php',
+  ruby: 'ruby',
+  swift: 'swift',
+  kotlin: 'kotlin',
+  go: 'go',
+  rust: 'rust',
+  flutter: 'flutter',
+  dart: 'dart',
+  firebase: 'firebase',
+  aws: 'amazonwebservices',
+  tensorflow: 'tensorflow',
+  pytorch: 'pytorch',
+  flask: 'flask',
+  django: 'django',
+  spring: 'spring',
+  tailwind: 'tailwindcss',
+  tailwindcss: 'tailwindcss',
+  figma: 'figma',
+  redux: 'redux',
+  graphql: 'graphql',
+};
+
+export function getTechLogo(name: string): string | null {
+  const key = name.toLowerCase().trim();
+  const icon = devIconMap[key];
+  if (!icon) return null;
+  const plainOnly = ['github', 'express', 'nextjs', 'bash', 'flask'];
+  const variant = plainOnly.includes(icon) ? 'plain' : 'original';
+  return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${icon}/${icon}-${variant}.svg`;
+}

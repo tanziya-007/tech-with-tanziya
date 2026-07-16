@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     creator: '@techwithtanziya',
   },
   icons: {
-    icon: '/logo.svg',
+    icon: '/logo.png',
   },
 };
 

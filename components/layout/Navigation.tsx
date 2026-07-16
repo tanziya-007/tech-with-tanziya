@@ -214,11 +214,11 @@ const links = [
 ];
 
 const adminLinks = [
-  { name: "📊 Cheat Sheets", href: "/admin/cheatsheet-upload" },
-  { name: "📝 Blogs", href: "/admin/blog-upload" },
-  { name: "🚀 Projects", href: "/admin/project-upload" },
-  { name: "📚 Resources", href: "/admin/resource-upload" },
-  { name: "🗺️ Roadmaps", href: "/admin/roadmap-upload" },
+  { name: "Cheat Sheets", href: "/admin/cheatsheet-upload" },
+  { name: "Blogs", href: "/admin/blog-upload" },
+  { name: "Projects", href: "/admin/project-upload" },
+  { name: "Resources", href: "/admin/resource-upload" },
+  { name: "Roadmaps", href: "/admin/roadmap-upload" },
 ];
 
 export function Navigation() {
@@ -275,7 +275,7 @@ export function Navigation() {
                 className="admin-btn"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                🔐 Admin
+                Admin
               </button>
               {showDropdown && (
                 <div className="admin-dropdown">
@@ -292,7 +292,7 @@ export function Navigation() {
                       ))}
                       <div className="admin-dropdown-divider"></div>
                       <button onClick={handleLogout}>
-                        🚪 Logout
+                        Logout
                       </button>
                     </>
                   ) : (
@@ -300,7 +300,7 @@ export function Navigation() {
                       href="/admin/login"
                       onClick={() => setShowDropdown(false)}
                     >
-                      🔑 Login
+                      Login
                     </Link>
                   )}
                 </div>

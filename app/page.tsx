@@ -16,12 +16,12 @@ import {
   fetchResources,
 } from "@/lib/api";
 import {
-  cheatSheets,
   blogs,
   projects,
   roadmaps,
   resources,
 } from "@/data/content";
+import { getTechLogo } from "@/lib/techLogos";
 
 const styles = `
 /* ===========================
@@ -459,33 +459,20 @@ const styles = `
 `;
 
 export default function HomePage() {
-  const [sheets, setSheets] = useState(cheatSheets);
+  const [sheets, setSheets] = useState<any[]>([]);
   const [blogPosts, setBlogPosts] = useState(blogs);
   const [projectList, setProjectList] = useState(projects);
   const [roadmapList, setRoadmapList] = useState(roadmaps);
   const [resourceList, setResourceList] = useState(resources);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [sheetsData, blogsData, projectsData, roadmapsData, resourcesData] = await Promise.all([
-          fetchCheatSheets(),
-          fetchBlogs(),
-          fetchProjects(),
-          fetchRoadmaps(),
-          fetchResources(),
-        ]);
-        setSheets(sheetsData);
-        setBlogPosts(blogsData);
-        setProjectList(projectsData);
-        setRoadmapList(roadmapsData);
-        setResourceList(resourcesData);
-      } catch (error) {
-        console.log('Using fallback data');
-      }
-    };
-
-    fetchData();
+    fetchCheatSheets()
+      .then(data => setSheets(data.filter((s: any) => s.googleDriveId)))
+      .catch(() => {});
+    fetchBlogs().then(setBlogPosts).catch(() => {});
+    fetchProjects().then(setProjectList).catch(() => {});
+    fetchRoadmaps().then(setRoadmapList).catch(() => {});
+    fetchResources().then(setResourceList).catch(() => {});
   }, []);
 
   return (
@@ -565,22 +552,30 @@ export default function HomePage() {
             />
 
             <div className="contentGrid">
-              {sheets.slice(0, 6).map((sheet) => (
-                <Link
-                  key={sheet.slug}
-                  href={`/cheatsheets/${sheet.slug}`}
-                  className="contentCard"
-                >
-                  <div className="cardTop">
-                    <span className="cardCategory">{sheet.category}</span>
-                  </div>
-                  <h3>{sheet.title}</h3>
-                  <p>{sheet.description}</p>
-                  <div className="cardBottom">
-                    <span>Read Guide</span>
-                  </div>
-                </Link>
-              ))}
+              {sheets.slice(0, 6).map((sheet) => {
+                const logo = getTechLogo(sheet.title) || getTechLogo(sheet.slug);
+                return (
+                  <Link
+                    key={sheet.slug}
+                    href={`/cheatsheets/${sheet.slug}`}
+                    className="contentCard"
+                  >
+                    <div className="cardTop" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg,#f3e8ff,#fce7f3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, flexShrink: 0 }}>
+                        {logo
+                          ? <img src={logo} alt={sheet.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          : <span style={{ fontSize: 24 }}>📘</span>}
+                      </div>
+                      {sheet.category && <span className="cardCategory">{sheet.category}</span>}
+                    </div>
+                    <h3>{sheet.title}</h3>
+                    <p>{sheet.description}</p>
+                    <div className="cardBottom">
+                      <span>Read Guide</span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

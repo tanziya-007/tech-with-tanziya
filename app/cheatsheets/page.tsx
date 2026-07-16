@@ -6,7 +6,7 @@ import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/SectionHeading";
 import { fetchCheatSheets } from "@/lib/api";
-import { cheatSheets } from "@/data/content";
+import { getTechLogo } from "@/lib/techLogos";
 
 const styles = `
 .cheats-page { 
@@ -52,13 +52,16 @@ const styles = `
   display: flex; 
   align-items: center; 
   justify-content: center; 
-  font-size: 34px; 
-  background: linear-gradient(135deg, #7C3AED, #EC4899); 
-  color: white; 
+  background: linear-gradient(135deg, #f3e8ff, #fce7f3); 
   border-radius: 18px; 
   margin-bottom: 10px;
-  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.15);
+  overflow: hidden;
+  padding: 12px;
 }
+
+.cheat-icon img { width: 100%; height: 100%; object-fit: contain; }
+.cheat-icon span { font-size: 34px; }
 
 .cheat-card h3 { 
   font-size: 24px; 
@@ -155,6 +158,7 @@ const icons: Record<string, string> = {
   Java: "☕",
   Python: "🐍",
   SQL: "🗄️",
+  MySQL: "🐬",
   HTML: "🌐",
   CSS: "🎨",
   JavaScript: "⚡",
@@ -163,30 +167,23 @@ const icons: Record<string, string> = {
 };
 
 export default function CheatSheetsPage() {
-  const [customSheets, setCustomSheets] = useState<any[]>([]);
+  const [sheets, setSheets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const apiSheets = await fetchCheatSheets();
-        setCustomSheets(apiSheets);
-      } catch (error) {
-        console.log('Using fallback data');
-        setCustomSheets(cheatSheets);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchCheatSheets()
+      .then(data => setSheets(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const getIcon = (title: string) => {
-    return icons[title] || "📘";
-  };
+  const getIcon = (title: string) => icons[title] || "📘";
 
-  const allSheets = customSheets.length > 0 ? customSheets : cheatSheets;
+  const renderIcon = (title: string, slug: string) => {
+    const logo = getTechLogo(title) || getTechLogo(slug);
+    if (logo) return <img src={logo} alt={title} />;
+    return <span>{getIcon(title)}</span>;
+  };
 
   return (
     <>
@@ -201,15 +198,19 @@ export default function CheatSheetsPage() {
               description="Master programming with quick, easy-to-understand reference guides."
             />
 
+            {loading && <p style={{ textAlign: 'center', color: '#9CA3AF' }}>Loading...</p>}
+            {!loading && sheets.length === 0 && (
+              <p style={{ textAlign: 'center', color: '#9CA3AF' }}>No cheat sheets uploaded yet.</p>
+            )}
             <div className="cards">
-              {allSheets.map((sheet) => (
+              {sheets.map((sheet) => (
                 <Link
                   key={sheet.slug}
                   href={`/cheatsheets/${sheet.slug}`}
                   className="feature-card cheat-card"
                 >
                   <div className="cheat-icon">
-                    {getIcon(sheet.title)}
+                    {renderIcon(sheet.title, sheet.slug)}
                   </div>
                   <h3>{sheet.title}</h3>
                   <p>{sheet.description}</p>

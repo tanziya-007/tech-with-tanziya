@@ -1,0 +1,128 @@
+TechWithTanziya Project Report
+
+1. Project Summary
+- Name: TechWithTanziya
+- Type: Content-first learning platform
+- Stack:
+  - Frontend: Next.js 15.2.0, React 18.3.1, TypeScript 5.5.4
+  - Backend: Node.js, Express 4.18.2, MongoDB via Mongoose 8
+  - Auth: jsonwebtoken, bcryptjs
+  - Deployment-ready design: separate frontend and backend, with npm run dev:full to run both concurrently
+
+2. Repository Layout
+- app/ — Next.js App Router pages
+- components/ — shared React UI components
+- context/ — AdminContext
+- data/ — static content model data
+- lib/ — API client helpers
+- types/ — TypeScript content type definitions
+- public/ — static assets and upload metadata
+- backend/ — Express API, MongoDB models, Google Drive sync, admin/auth support
+- docs: README.md, BACKEND_SETUP.md, DEPLOYMENT_GUIDE.md, API_INTEGRATION_GUIDE.md, PROJECT_DOCUMENTATION.txt
+
+3. Frontend Architecture
+- Uses Next.js App Router with server and client components
+- Global root layout in app/layout.tsx
+  - metadata, Open Graph, Twitter card, site icon
+  - wraps pages in AdminProvider
+- Main homepage in app/page.tsx
+  - hero section
+  - feature grid
+  - content previews for cheatsheets, blogs, projects, roadmaps, and resources
+- Routes:
+  - /cheatsheets
+  - /blog
+  - /projects
+  - /resources
+  - /roadmaps
+  - /about
+  - /contact
+  - /admin and admin upload routes under /admin/*
+- Client-side interactive pages use 'use client' and useState/useEffect
+- Theme persistence uses localStorage in Navigation
+
+4. Data and Content
+- Static content source: data/content.ts
+  - cheatSheets
+  - blogs
+  - projects
+  - resources
+  - roadmaps
+- Content types defined in types/content.ts
+- Pages use lib/api.ts functions to fetch dynamic data from backend API
+- Static content arrays are currently the main content source for many listings
+
+5. Backend Architecture
+- Express API in backend/server.js
+- MongoDB models in backend/models.js
+- Google Drive integration in backend/googleDrive.js
+- Backend features:
+  - GET /api/health
+  - Auth login: POST /api/login
+  - Admin-protected create/update/delete endpoints for blogs, cheat sheets, etc.
+  - Google Drive folder listing and image proxy endpoints
+  - Sync drive content into MongoDB: POST /api/sync-drive
+  - CRUD-style GET endpoints for cheatsheets, blogs, projects, resources, roadmaps
+- Environment configuration via backend/.env
+  - MONGODB_URI
+  - JWT_SECRET
+  - Google Drive credentials and folder ID
+  - BACKEND_URL, CORS_ORIGIN
+
+6. Key Features
+- Content hub for cheat sheets, blog posts, projects, resources, and roadmaps
+- Admin section for managing uploads and content
+- Google Drive-backed content sync
+- JWT-based admin authentication
+- Responsive UI with custom component styling
+- SEO metadata configured in app/layout.tsx
+
+7. Tooling & Scripts
+- Root package.json
+  - dev → next dev
+  - build → next build
+  - start → next start
+  - lint → next lint
+  - dev:full → run frontend + backend together
+- Backend package.json
+  - dev → node --watch server.js
+  - start → node server.js
+  - prod → NODE_ENV=production node server.js
+
+8. Stability & Risks
+- Static content stored directly in data/content.ts is simple but not scalable for non-dev content editing
+- Backend API is mostly centralized in one file (server.js), which is okay now but may need refactoring as endpoints grow
+- Google Drive integration depends on service account credential management and environment setup
+- No automated tests currently visible in repo
+
+9. Recommended Improvements
+- Move content to Markdown/MDX or CMS for easier editing and content versioning
+- Add tests: React component unit tests and API contract/integration tests
+- Add CI workflow: install, lint, build, and tests on PRs
+- Add production configuration: validate NEXT_PUBLIC_API_URL, use secure backend CORS origins, ensure metadataBase uses production URL
+- Consider splitting backend controllers/routes into modules for maintainability
+
+10. Notable Files
+- package.json
+- tsconfig.json
+- next.config.js
+- app/layout.tsx
+- app/page.tsx
+- app/globals.css
+- components/layout/Navigation.tsx
+- components/layout/Footer.tsx
+- data/content.ts
+- lib/api.ts
+- backend/server.js
+- backend/models.js
+- backend/README / BACKEND_SETUP.md
+
+11. Deployment Notes
+- Frontend is well-suited for Vercel
+- Backend can deploy to Railway, Render, Heroku, or similar Node host
+- Ensure environment variables are configured on the host:
+  - MONGODB_URI
+  - JWT_SECRET
+  - Google Drive service credentials
+  - NEXT_PUBLIC_API_URL
+- next.config.js allows images from cdn.jsdelivr.net

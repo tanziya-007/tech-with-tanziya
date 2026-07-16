@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
-import { fetchCheatSheet } from '@/lib/api';
-import { cheatSheets } from '@/data/content';
 
 type PageProps = {
   params: Promise<{
@@ -36,11 +34,6 @@ const styles = `
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 16px;
-}
-
-.badge.custom {
-  background: #DBEAFE;
-  color: #3B82F6;
 }
 
 .cheatsheet-header h1 {
@@ -211,76 +204,31 @@ const styles = `
 
 export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
   const params = use(paramsPromise);
-  const sheet = cheatSheets.find((item) => item.slug === params.slug);
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [imageExists, setImageExists] = useState(false);
+  const [sheet, setSheet] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isCustom, setIsCustom] = useState(false);
+  const [notFoundState, setNotFoundState] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchCheatSheet(params.slug);
-      } catch (error) {
-        console.log('Using fallback data');
-      }
-    };
-
-    fetchData();
+    const api = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    fetch(`${api}/cheatsheets/${params.slug}`)
+      .then(res => {
+        if (!res.ok) { setNotFoundState(true); return null; }
+        return res.json();
+      })
+      .then(data => {
+        if (data) setSheet(data);
+      })
+      .catch(() => setNotFoundState(true))
+      .finally(() => setLoading(false));
   }, [params.slug]);
 
-  useEffect(() => {
-    const checkImage = async () => {
-      try {
-        const extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
-        
-        for (const ext of extensions) {
-          const url = `/uploads/cheatsheets/${params.slug}.${ext}`;
-          const response = await fetch(url, { method: 'HEAD' });
-          
-          if (response.ok) {
-            setImageUrl(url);
-            setImageExists(true);
-            if (!sheet) {
-              setIsCustom(true);
-            }
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('No image found for this cheat sheet');
-      } finally {
-        setLoading(false);
-      }
-    };
+  if (!loading && notFoundState) notFound();
 
-    checkImage();
-  }, [params.slug, sheet]);
+  const driveId = sheet?.googleDriveId;
+  const previewUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : null;
+  const downloadUrl = driveId ? `https://drive.google.com/uc?export=download&id=${driveId}` : null;
 
-  if (!sheet && !imageExists && !loading) {
-    notFound();
-  }
-
-  const displaySheet = sheet || {
-    slug: params.slug,
-    title: params.slug.charAt(0).toUpperCase() + params.slug.slice(1),
-    description: `Custom cheat sheet for ${params.slug}`,
-    category: 'Custom',
-    highlights: [],
-    topics: [],
-    interviews: [],
-  };
-
-  const handleDownload = () => {
-    if (imageUrl) {
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      link.download = `${displaySheet.title}-cheatsheet.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
+  const handleDownload = () => { if (downloadUrl) window.open(downloadUrl, '_blank'); };
 
   return (
     <>
@@ -290,27 +238,10 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
         <section>
           <div className="container cheatsheet-container">
             <div className="cheatsheet-header">
-              <p className={`badge ${isCustom ? 'custom' : ''}`}>
-                {isCustom ? 'Custom' : 'Cheat Sheet'}
-              </p>
-              <h1>{displaySheet.title} Cheat Sheet</h1>
-              <p>{displaySheet.description}</p>
+              <p className="badge">{sheet?.category || 'Cheat Sheet'}</p>
+              <h1>{sheet?.title} Cheat Sheet</h1>
+              <p>{sheet?.description}</p>
             </div>
-
-            {!loading && (
-              <div className="image-section">
-                {imageExists && imageUrl ? (
-                  <img src={imageUrl} alt={displaySheet.title} />
-                ) : (
-                  <div className="no-image">
-                    <p>📋 No cheat sheet image uploaded yet</p>
-                    <p style={{ fontSize: '14px', marginTop: '8px' }}>
-                      Admin can upload an image from the Upload Sheet button
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
 
             {loading && (
               <div className="image-section">
@@ -318,20 +249,34 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
               </div>
             )}
 
-            {displaySheet.topics.length > 0 || displaySheet.interviews.length > 0 ? (
+            {!loading && (
+              <div className="image-section">
+                {previewUrl ? (
+                  <iframe
+                    src={previewUrl}
+                    style={{ width: '100%', minHeight: '500px', border: 'none' }}
+                    allow="autoplay"
+                  />
+                ) : (
+                  <div className="no-image">
+                    <p>📋 No cheat sheet uploaded yet</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {sheet?.topics?.length > 0 || sheet?.interviews?.length > 0 ? (
               <div className="section-grid">
                 <article className="card">
                   <h2>Introduction</h2>
                   <p>A focused overview to boost your understanding and help you learn faster.</p>
                 </article>
-                {displaySheet.topics.length > 0 && (
+                {sheet.topics?.length > 0 && (
                   <article className="card">
                     <h2>Syntax & Essentials</h2>
                     <p>Key language syntax, structure, and usage guidelines in one place.</p>
                     <ul>
-                      {displaySheet.topics.map((topic) => (
-                        <li key={topic}>{topic}</li>
-                      ))}
+                      {sheet.topics.map((t: string) => <li key={t}>{t}</li>)}
                     </ul>
                   </article>
                 )}
@@ -339,13 +284,11 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
                   <h2>Examples</h2>
                   <p>Simple code patterns to help you practice and remember the basics.</p>
                 </article>
-                {displaySheet.interviews.length > 0 && (
+                {sheet.interviews?.length > 0 && (
                   <article className="card">
                     <h2>Interview Questions</h2>
                     <ul>
-                      {displaySheet.interviews.map((question) => (
-                        <li key={question}>{question}</li>
-                      ))}
+                      {sheet.interviews.map((q: string) => <li key={q}>{q}</li>)}
                     </ul>
                   </article>
                 )}
@@ -353,7 +296,7 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
             ) : null}
 
             <div className="action-buttons">
-              {imageExists && imageUrl && (
+              {downloadUrl && (
                 <button className="button button-primary" onClick={handleDownload}>
                   ⬇️ Download Cheat Sheet
                 </button>
