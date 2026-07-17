@@ -5,7 +5,10 @@ const auth = new google.auth.GoogleAuth({
   scopes: ['https://www.googleapis.com/auth/drive.readonly']
 });
 
-const drive = google.drive({ version: 'v3', auth });
+const drive = google.drive({
+  version: 'v3',
+  auth
+});
 
 async function listFilesFromFolder(folderId) {
   const res = await drive.files.list({
@@ -15,6 +18,7 @@ async function listFilesFromFolder(folderId) {
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
   });
+
   return res.data.files || [];
 }
 
@@ -26,17 +30,19 @@ async function listSubFolders(folderId) {
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
   });
+
   return res.data.files || [];
 }
 
 async function listImagesInFolder(folderId) {
   const res = await drive.files.list({
-    q: `'${folderId}' in parents and trashed=false and (mimeType contains 'image/')`,
+    q: `'${folderId}' in parents and trashed=false and mimeType contains 'image/'`,
     fields: 'files(id, name, mimeType)',
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
   });
+
   return res.data.files || [];
 }
 
