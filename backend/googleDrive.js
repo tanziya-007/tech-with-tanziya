@@ -1,8 +1,7 @@
 const { google } = require('googleapis');
-const path = require('path');
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: path.resolve(__dirname, process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH),
+  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY),
   scopes: ['https://www.googleapis.com/auth/drive.readonly']
 });
 
@@ -44,11 +43,18 @@ async function listImagesInFolder(folderId) {
 async function listImagesInFolderRecursive(folderId) {
   const images = await listImagesInFolder(folderId);
   const subfolders = await listSubFolders(folderId);
+
   for (const subfolder of subfolders) {
     const nestedImages = await listImagesInFolderRecursive(subfolder.id);
     images.push(...nestedImages);
   }
+
   return images;
 }
 
-module.exports = { listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFolderRecursive };
+module.exports = {
+  listFilesFromFolder,
+  listSubFolders,
+  listImagesInFolder,
+  listImagesInFolderRecursive
+};
