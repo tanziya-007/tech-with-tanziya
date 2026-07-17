@@ -143,7 +143,13 @@ app.post('/api/sync-drive', async (req, res) => {
       if (!images.length) continue;
       await CheatSheet.findOneAndUpdate(
         { slug },
-        { slug, title: folder.name, googleDriveId: images[0].id, updatedAt: new Date() },
+        {
+          slug,
+          title: folder.name,
+          googleDriveFolderId: folder.id,
+          googleDriveId: images[0]?.id,
+          updatedAt: new Date()
+        },
         { upsert: true, new: true }
       );
       synced.push(slug);
@@ -181,12 +187,31 @@ app.get('/api/cheatsheets/:slug', async (req, res) => {
 
 app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
   try {
-    const sheet = await CheatSheet.findOne({ slug: req.params.slug }).select('googleDriveId title');
-    if (!sheet || !sheet.googleDriveId) return res.status(404).json({ error: 'No drive link found' });
+    const sheet = await CheatSheet.findOne({ slug: req.params.slug }).select('googleDriveId googleDriveFolderId title');
+    if (!sheet) return res.status(404).json({ error: 'No drive link found' });
+
+    if (sheet.googleDriveFolderId) {
+      const files = await listImagesInFolderRecursive(sheet.googleDriveFolderId);
+      const items = files.map(f => ({
+        id: f.id,
+        name: f.name,
+        previewUrl: `https://drive.google.com/file/d/${f.id}/preview`,
+        downloadUrl: `https://drive.google.com/uc?export=download&id=${f.id}`
+      }));
+      return res.json({ images: items });
+    }
+
+    if (!sheet.googleDriveId) return res.status(404).json({ error: 'No drive link found' });
     const id = sheet.googleDriveId;
     res.json({
-      previewUrl: `https://drive.google.com/file/d/${id}/preview`,
-      downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`
+      images: [
+        {
+          id,
+          name: sheet.title,
+          previewUrl: `https://drive.google.com/file/d/${id}/preview`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`
+        }
+      ]
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -195,12 +220,23 @@ app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
 
 app.post('/api/cheatsheets', authMiddleware, async (req, res) => {
   try {
-    const { slug, title, description, category, googleDriveId, topics, highlights, interviews } = req.body;
+    const { slug, title, description, category, googleDriveId, googleDriveFolderId, topics, highlights, interviews } = req.body;
     if (!slug || !title || !googleDriveId)
       return res.status(400).json({ error: 'slug, title and googleDriveId are required' });
     const sheet = await CheatSheet.findOneAndUpdate(
       { slug },
-      { slug, title, description, category, googleDriveId, topics, highlights, interviews, updatedAt: new Date() },
+      {
+        slug,
+        title,
+        description,
+        category,
+        googleDriveId,
+        googleDriveFolderId,
+        topics,
+        highlights,
+        interviews,
+        updatedAt: new Date()
+      },
       { upsert: true, new: true }
     );
     res.json(sheet);

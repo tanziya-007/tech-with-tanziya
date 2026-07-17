@@ -207,9 +207,16 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
   const [sheet, setSheet] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFoundState, setNotFoundState] = useState(false);
+  const [driveImages, setDriveImages] = useState<Array<{ id: string; name: string; previewUrl: string; downloadUrl: string }>>([]);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
 
   useEffect(() => {
     const api = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    setLoading(true);
+    setNotFoundState(false);
+    setDriveImages([]);
+    setSelectedImageId(null);
+
     fetch(`${api}/cheatsheets/${params.slug}`)
       .then(res => {
         if (!res.ok) { setNotFoundState(true); return null; }
@@ -222,11 +229,29 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
       .finally(() => setLoading(false));
   }, [params.slug]);
 
+  useEffect(() => {
+    if (!sheet) return;
+    const api = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+    fetch(`${api}/cheatsheets/${params.slug}/drive`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => {
+        if (Array.isArray(data.images) && data.images.length) {
+          setDriveImages(data.images);
+          setSelectedImageId(data.images[0].id);
+        }
+      })
+      .catch(() => {
+        setDriveImages([]);
+        setSelectedImageId(null);
+      });
+  }, [sheet, params.slug]);
+
   if (!loading && notFoundState) notFound();
 
-  const driveId = sheet?.googleDriveId;
-  const previewUrl = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : null;
-  const downloadUrl = driveId ? `https://drive.google.com/uc?export=download&id=${driveId}` : null;
+  const selectedImage = driveImages.find(img => img.id === selectedImageId) || driveImages[0] || null;
+  const previewUrl = selectedImage?.previewUrl ?? null;
+  const downloadUrl = selectedImage?.downloadUrl ?? null;
 
   const handleDownload = () => { if (downloadUrl) window.open(downloadUrl, '_blank'); };
 
@@ -250,16 +275,34 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
             )}
 
             {!loading && (
-              <div className="image-section">
-                {previewUrl ? (
-                  <iframe
-                    src={previewUrl}
-                    style={{ width: '100%', minHeight: '500px', border: 'none' }}
-                    allow="autoplay"
-                  />
-                ) : (
-                  <div className="no-image">
-                    <p>📋 No cheat sheet uploaded yet</p>
+              <div>
+                <div className="image-section">
+                  {previewUrl ? (
+                    <iframe
+                      src={previewUrl}
+                      style={{ width: '100%', minHeight: '500px', border: 'none' }}
+                      allow="autoplay"
+                    />
+                  ) : (
+                    <div className="no-image">
+                      <p>📋 No cheat sheet uploaded yet</p>
+                    </div>
+                  )}
+                </div>
+
+                {driveImages.length > 1 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '20px' }}>
+                    {driveImages.map(image => (
+                      <button
+                        key={image.id}
+                        className={`button button-secondary ${selectedImageId === image.id ? 'selected' : ''}`}
+                        type="button"
+                        onClick={() => setSelectedImageId(image.id)}
+                        style={{ padding: '10px 16px', fontSize: '14px' }}
+                      >
+                        {image.name}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>

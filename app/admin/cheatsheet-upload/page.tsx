@@ -124,7 +124,14 @@ export default function CheatSheetUploadPage() {
       const res = await fetch(`${API}/cheatsheets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ slug, title, description, category, googleDriveId: selectedImage.id })
+        body: JSON.stringify({
+          slug,
+          title,
+          description,
+          category,
+          googleDriveId: selectedImage.id,
+          googleDriveFolderId: selectedFolder
+        })
       });
       if (res.ok) {
         setMessage('✓ Cheat sheet saved successfully!');

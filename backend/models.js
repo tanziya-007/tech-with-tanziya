@@ -13,6 +13,7 @@ const cheatSheetSchema = new mongoose.Schema({
   image: String,
   content: String,
   googleDriveId: String,
+  googleDriveFolderId: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
