@@ -27,6 +27,7 @@ async function listFilesFromFolder(folderId) {
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed=false`,
     fields: "files(id,name,mimeType)",
+    orderBy: "name",
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
@@ -39,6 +40,7 @@ async function listSubFolders(folderId) {
   const res = await drive.files.list({
     q: `'${folderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
     fields: "files(id,name)",
+    orderBy: "name",
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
@@ -51,6 +53,7 @@ async function listImagesInFolder(folderId) {
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed=false and mimeType contains 'image/'`,
     fields: "files(id,name,mimeType)",
+    orderBy: "name",
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
