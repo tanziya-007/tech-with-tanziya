@@ -277,6 +277,19 @@ app.get('/api/cheatsheets', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/cheatsheets/:slug', async (req, res) => {
+  try {
+    const sheet = await CheatSheet.findOne({ slug: req.params.slug });
+
+    if (!sheet) {
+      return res.status(404).json({ error: "Not found" });
+    }
+
+    res.json(sheet);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
   try {
