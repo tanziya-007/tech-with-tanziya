@@ -1,19 +1,32 @@
-const { google } = require('googleapis');
+const { google } = require("googleapis");
+const path = require("path");
+require("dotenv").config();
+
+if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH) {
+  throw new Error(
+    "GOOGLE_SERVICE_ACCOUNT_KEY_PATH is missing in backend/.env"
+  );
+}
 
 const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY),
-  scopes: ['https://www.googleapis.com/auth/drive.readonly']
+  keyFile: path.resolve(
+    __dirname,
+    process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH
+  ),
+  scopes: [
+    "https://www.googleapis.com/auth/drive.readonly"
+  ]
 });
 
 const drive = google.drive({
-  version: 'v3',
+  version: "v3",
   auth
 });
 
 async function listFilesFromFolder(folderId) {
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed=false`,
-    fields: 'files(id, name, mimeType)',
+    fields: "files(id,name,mimeType)",
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
@@ -25,7 +38,7 @@ async function listFilesFromFolder(folderId) {
 async function listSubFolders(folderId) {
   const res = await drive.files.list({
     q: `'${folderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-    fields: 'files(id, name)',
+    fields: "files(id,name)",
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
@@ -37,7 +50,7 @@ async function listSubFolders(folderId) {
 async function listImagesInFolder(folderId) {
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed=false and mimeType contains 'image/'`,
-    fields: 'files(id, name, mimeType)',
+    fields: "files(id,name,mimeType)",
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true
@@ -50,9 +63,9 @@ async function listImagesInFolderRecursive(folderId) {
   const images = await listImagesInFolder(folderId);
   const subfolders = await listSubFolders(folderId);
 
-  for (const subfolder of subfolders) {
-    const nestedImages = await listImagesInFolderRecursive(subfolder.id);
-    images.push(...nestedImages);
+  for (const folder of subfolders) {
+    const nested = await listImagesInFolderRecursive(folder.id);
+    images.push(...nested);
   }
 
   return images;

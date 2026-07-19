@@ -255,6 +255,37 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
 
   const handleDownload = () => { if (downloadUrl) window.open(downloadUrl, '_blank'); };
 
+  const handlePrev = () => {
+    if (driveImages.length <= 1) return;
+    const currentIndex = driveImages.findIndex(img => img.id === selectedImage?.id);
+    const prevIndex = currentIndex <= 0 ? driveImages.length - 1 : currentIndex - 1;
+    setSelectedImageId(driveImages[prevIndex].id);
+  };
+
+  const handleNext = () => {
+    if (driveImages.length <= 1) return;
+    const currentIndex = driveImages.findIndex(img => img.id === selectedImage?.id);
+    const nextIndex = currentIndex === -1 || currentIndex === driveImages.length - 1 ? 0 : currentIndex + 1;
+    setSelectedImageId(driveImages[nextIndex].id);
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (driveImages.length <= 1) return;
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        handlePrev();
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [driveImages, selectedImage]);
+
   return (
     <>
       <style>{styles}</style>
