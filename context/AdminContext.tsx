@@ -5,7 +5,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 type AdminContextType = {
   isAdmin: boolean;
   token: string | null;
-  login: (username: string, password: string) => Promise<boolean>;
+  requestOtp: (email: string) => Promise<{ success: boolean; error?: string; expiresIn?: number }>;
+  verifyOtp: (email: string, otp: string) => Promise<boolean>;
   logout: () => void;
   handleAuthError: (status: number) => void;
   mounted: boolean;
@@ -27,12 +28,29 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const requestOtp = async (email: string): Promise<{ success: boolean; error?: string; expiresIn?: number }> => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/admin/request-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, error: data.error || 'Failed to send OTP' };
+      }
+      return { success: true, expiresIn: data.expiresIn };
+    } catch {
+      return { success: false, error: 'Network error while requesting OTP' };
+    }
+  };
+
+  const verifyOtp = async (email: string, otp: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/admin/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
       });
       if (!res.ok) return false;
       const { token } = await res.json();
@@ -56,7 +74,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AdminContext.Provider value={{ isAdmin, token, login, logout, handleAuthError, mounted }}>
+    <AdminContext.Provider value={{ isAdmin, token, requestOtp, verifyOtp, logout, handleAuthError, mounted }}>
       {children}
     </AdminContext.Provider>
   );
@@ -64,6 +82,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
 export function useAdmin() {
   const context = useContext(AdminContext);
-  if (!context) return { isAdmin: false, token: null, login: async () => false, logout: () => {}, handleAuthError: () => {}, mounted: false };
+  if (!context) return { isAdmin: false, token: null, requestOtp: async () => ({ success: false }), verifyOtp: async () => false, logout: () => {}, handleAuthError: () => {}, mounted: false };
   return context;
 }

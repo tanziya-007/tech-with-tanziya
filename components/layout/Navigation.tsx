@@ -230,12 +230,12 @@ export function Navigation() {
 
   useEffect(() => {
     setMounted(true);
-    const adminAuth = localStorage.getItem('adminAuth');
-    setIsAdmin(adminAuth === 'true');
+    const adminToken = localStorage.getItem('adminToken');
+    setIsAdmin(Boolean(adminToken));
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('adminAuth');
+    localStorage.removeItem('adminToken');
     setIsAdmin(false);
     setShowDropdown(false);
     router.push("/");

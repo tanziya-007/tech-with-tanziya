@@ -1,4 +1,5 @@
 require('dotenv').config();
+const crypto = require('crypto');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,9 +7,37 @@ const jwt = require('jsonwebtoken');
 
 const { CheatSheet, Blog, Project, Resource, Roadmap, User } = require('./models');
 const { listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFolderRecursive } = require('./googleDrive');
+const sendOTP = require('./mailService');
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+const OTP_TTL_MS = 5 * 60 * 1000;
+const OTP_MAX_ATTEMPTS = 5;
+const otpStore = new Map();
+
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function generateOtp() {
+  return crypto.randomInt(100000, 1000000).toString();
+}
+
+function hashOtp(otp) {
+  return crypto.createHash('sha256').update(otp).digest('hex');
+}
+
+function getOtpRecord(username) {
+  const record = otpStore.get(username);
+  if (!record) return null;
+  if (record.expiresAt <= Date.now()) {
+    otpStore.delete(username);
+    return null;
+  }
+  return record;
+}
 
 // CORS: allow a comma-separated list via CORS_ORIGIN, e.g.
 // CORS_ORIGIN="http://localhost:3000,https://tech-with-tanziya-rg1z.vercel.app"
@@ -55,19 +84,93 @@ function authMiddleware(req, res, next) {
 // ================================
 // Health Check
 // ================================
+app.get('/api', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'TechWithTanziya backend API is running',
+    endpoints: ['/api/health']
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // ================================
-// Login
+// Admin OTP Login
 // ================================
-app.post('/api/login', async (req, res) => {
+app.post('/api/admin/request-otp', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
-    if (!user || !(await user.comparePassword(password)))
-      return res.status(401).json({ error: 'Invalid credentials' });
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL)) {
+      return res.status(401).json({ error: 'Invalid admin account' });
+    }
+
+    if (!ADMIN_EMAIL) {
+      return res.status(500).json({ error: 'Admin email is not configured' });
+    }
+
+    const otp = generateOtp();
+    otpStore.set(normalizedEmail, {
+      hash: hashOtp(otp),
+      expiresAt: Date.now() + OTP_TTL_MS,
+      attempts: 0
+    });
+
+    await sendOTP(ADMIN_EMAIL, otp);
+
+    return res.json({
+      message: 'OTP sent to the admin email address',
+      expiresIn: OTP_TTL_MS / 1000
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/admin/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: 'Email and OTP are required' });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+    if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL)) {
+      return res.status(401).json({ error: 'Invalid admin account' });
+    }
+
+    const record = getOtpRecord(normalizedEmail);
+    if (!record) {
+      return res.status(401).json({ error: 'OTP expired or not requested' });
+    }
+
+    if (record.attempts >= OTP_MAX_ATTEMPTS) {
+      otpStore.delete(normalizedEmail);
+      return res.status(429).json({ error: 'Too many invalid OTP attempts' });
+    }
+
+    if (record.hash !== hashOtp(otp.trim())) {
+      record.attempts += 1;
+      if (record.attempts >= OTP_MAX_ATTEMPTS) {
+        otpStore.delete(normalizedEmail);
+      }
+      return res.status(401).json({ error: 'Invalid OTP' });
+    }
+
+    otpStore.delete(normalizedEmail);
+    const user = await User.findOne({ username: ADMIN_USERNAME });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid admin account' });
+    }
+
     const token = jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
     res.json({ token });
   } catch (error) {

@@ -101,16 +101,23 @@ const styles = `
   color: #991b1b;
   border: 1px solid #fca5a5;
 }
+
+.message.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
 `;
 
 export default function AdminLoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { login, isAdmin } = useAdmin();
+  const { requestOtp, verifyOtp, isAdmin } = useAdmin();
 
   useEffect(() => {
     setMounted(true);
@@ -123,12 +130,22 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const success = await login(username, password);
-    if (success) {
-      router.push('/admin');
+    if (!otpSent) {
+      const result = await requestOtp(email);
+      if (result.success) {
+        setOtpSent(true);
+        setError('OTP sent to your admin email. Enter the code to continue.');
+      } else {
+        setError(result.error || 'Failed to send OTP');
+      }
     } else {
-      setError('Invalid username or password');
-      setPassword('');
+      const success = await verifyOtp(email, otp);
+      if (success) {
+        router.push('/admin');
+      } else {
+        setError('Invalid or expired OTP');
+        setOtp('');
+      }
     }
     setLoading(false);
   };
@@ -145,41 +162,46 @@ export default function AdminLoginPage() {
         <div className="container login-container">
           <div className="login-form">
             <h1 className="login-title">Admin Login</h1>
-            <p className="login-desc">Enter password to access admin panel</p>
+            <p className="login-desc">Enter the admin email to receive a one-time password, then verify it to access the admin panel</p>
 
-            {error && <div className="message error">{error}</div>}
+            {error && <div className={`message ${error.toLowerCase().includes('sent') ? 'success' : 'error'}`}>{error}</div>}
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="username">Username</label>
+                <label htmlFor="email">Email</label>
                 <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter admin email"
                   disabled={loading}
                   autoFocus
                 />
               </div>
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
-                  disabled={loading}
-                />
-              </div>
+
+              {otpSent && (
+                <div className="form-group">
+                  <label htmlFor="otp">OTP</label>
+                  <input
+                    id="otp"
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter the 6-digit OTP"
+                    disabled={loading}
+                    inputMode="numeric"
+                    maxLength={6}
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"
                 className="button button-primary"
-                disabled={loading || !password || !username}
+                disabled={loading || !email || (otpSent && !otp)}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {loading ? 'Please wait...' : otpSent ? 'Verify OTP' : 'Send OTP'}
               </button>
             </form>
           </div>
