@@ -271,12 +271,12 @@ export function Navigation() {
 
           <div className="nav-buttons">
             <div style={{ position: "relative" }}>
-              <button
+              {/* <button
                 className="admin-btn"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 Admin
-              </button>
+              </button> */}
               {showDropdown && (
                 <div className="admin-dropdown">
                   {isAdmin ? (
