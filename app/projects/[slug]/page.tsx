@@ -12,7 +12,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 type PageProps = { params: Promise<{ slug: string }> };
 
 const styles = `
-.project-container { max-width: 900px; margin: 0 auto; padding: 40px 0; }
+.project-container { max-width: 1300px; margin: 0 auto; padding: 40px 0; }
 
 .project-header { margin-bottom: 36px; }
 .badge { display: inline-block; padding: 8px 16px; background: #EEF2FF; color: #6C3BFF; border-radius: 50px; font-size: 13px; font-weight: 700; margin-bottom: 16px; }
@@ -24,10 +24,10 @@ const styles = `
 
 .screenshots-section { margin-bottom: 40px; }
 .screenshots-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 16px; }
-.screenshots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.screenshots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; }
 .screenshot-card { border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: 0.3s; cursor: pointer; }
 .screenshot-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(124,58,237,0.15); border-color: #7C3AED; }
-.screenshot-card img { width: 100%; height: 180px; object-fit: cover; display: block; }
+.screenshot-card img { width: 100%; height: 320px; object-fit: cover; display: block; }
 
 .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
 .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 12px; object-fit: contain; }
