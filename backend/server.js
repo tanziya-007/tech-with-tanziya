@@ -175,43 +175,51 @@ app.get('/api/cheatsheets', async (req, res) => {
   }
 });
 
-app.get('/api/cheatsheets/:slug', async (req, res) => {
-  try {
-    const sheet = await CheatSheet.findOne({ slug: req.params.slug });
-    if (!sheet) return res.status(404).json({ error: 'Not found' });
-    res.json(sheet);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
   try {
-    const sheet = await CheatSheet.findOne({ slug: req.params.slug }).select('googleDriveId googleDriveFolderId title');
-    if (!sheet) return res.status(404).json({ error: 'No drive link found' });
+    const sheet = await CheatSheet.findOne({ slug: req.params.slug })
+      .select("googleDriveId googleDriveFolderId title");
+
+    if (!sheet) {
+      return res.status(404).json({ error: "No drive link found" });
+    }
 
     if (sheet.googleDriveFolderId) {
       const files = await listImagesInFolderRecursive(sheet.googleDriveFolderId);
-      const items = files.map(f => ({
+
+      // Sort alphabetically
+      files.sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        })
+      );
+
+      const items = files.map((f) => ({
         id: f.id,
         name: f.name,
         previewUrl: `https://drive.google.com/file/d/${f.id}/preview`,
-        downloadUrl: `https://drive.google.com/uc?export=download&id=${f.id}`
+        downloadUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
       }));
+
       return res.json({ images: items });
     }
 
-    if (!sheet.googleDriveId) return res.status(404).json({ error: 'No drive link found' });
+    if (!sheet.googleDriveId) {
+      return res.status(404).json({ error: "No drive link found" });
+    }
+
     const id = sheet.googleDriveId;
-    res.json({
+
+    return res.json({
       images: [
         {
           id,
           name: sheet.title,
           previewUrl: `https://drive.google.com/file/d/${id}/preview`,
-          downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`
-        }
-      ]
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`,
+        },
+      ],
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
