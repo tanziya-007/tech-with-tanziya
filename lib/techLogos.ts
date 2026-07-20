@@ -57,10 +57,18 @@ const devIconMap: Record<string, string> = {
 };
 
 export function getTechLogo(name: string): string | null {
-  const key = name.toLowerCase().trim();
+  const key = name
+    .toLowerCase()
+    .replace(/^\d+\./, "")   // removes 09.
+    .replace(/^\d+\s*/, "")  // removes 09
+    .trim();
+
   const icon = devIconMap[key];
+
   if (!icon) return null;
-  const plainOnly = ['github', 'express', 'nextjs', 'bash', 'flask'];
-  const variant = plainOnly.includes(icon) ? 'plain' : 'original';
+
+  const plainOnly = ["github", "express", "nextjs", "bash", "flask"];
+  const variant = plainOnly.includes(icon) ? "plain" : "original";
+
   return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${icon}/${icon}-${variant}.svg`;
 }
