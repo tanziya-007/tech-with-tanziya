@@ -80,8 +80,12 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAdmin() {
+export function useAdmin(): AdminContextType {
   const context = useContext(AdminContext);
-  if (!context) return { isAdmin: false, token: null, requestOtp: async () => ({ success: false }), verifyOtp: async () => false, logout: () => {}, handleAuthError: () => {}, mounted: false };
+
+  if (!context) {
+    throw new Error("useAdmin must be used within AdminProvider");
+  }
+
   return context;
 }
