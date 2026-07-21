@@ -111,7 +111,7 @@ export default function ProjectDetailPage({ params: paramsPromise }: PageProps) 
                   {screenshots.length > 0 ? (
                     <div className="screenshots-grid">
                       {screenshots.map(img => (
-                        <div key={img.id} className="screenshot-card" onClick={() => setLightbox(`http://localhost:5000/api/drive/image/${img.id}`)}>
+                        <div key={img.id} className="screenshot-card" onClick={() => setLightbox(`${API}/drive/image/${img.id}`)}>
                           <img src={`http://localhost:5000/api/drive/image/${img.id}`} alt={img.name} />
                         </div>
                       ))}
