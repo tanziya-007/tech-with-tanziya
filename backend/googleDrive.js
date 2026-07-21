@@ -1,18 +1,14 @@
 const { google } = require("googleapis");
-const path = require("path");
 require("dotenv").config();
 
-if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH) {
-  throw new Error(
-    "GOOGLE_SERVICE_ACCOUNT_KEY_PATH is missing in backend/.env"
-  );
+if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+  throw new Error("GOOGLE_SERVICE_ACCOUNT_KEY is missing.");
 }
 
+const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+
 const auth = new google.auth.GoogleAuth({
-  keyFile: path.resolve(
-    __dirname,
-    process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH
-  ),
+  credentials,
   scopes: [
     "https://www.googleapis.com/auth/drive.readonly"
   ]
