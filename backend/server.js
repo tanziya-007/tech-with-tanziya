@@ -45,13 +45,21 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
+  console.log("CORS_ORIGIN ENV:", process.env.CORS_ORIGIN);
+console.log("Allowed Origins:", allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow non-browser (server-to-server) requests when origin is undefined
+    console.log("Incoming Origin:", origin);
+
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.log("Rejected Origin:", origin);
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true
 }));
