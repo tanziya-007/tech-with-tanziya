@@ -128,22 +128,31 @@ if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL)) {
       return res.status(500).json({ error: 'Admin email is not configured' });
     }
 
-    const otp = generateOtp();
-    otpStore.set(normalizedEmail, {
-      hash: hashOtp(otp),
-      expiresAt: Date.now() + OTP_TTL_MS,
-      attempts: 0
-    });
+ const otp = generateOtp();
 
-    await sendOTP(ADMIN_EMAIL, otp);
+console.log("OTP Generated:", otp);
 
-    return res.json({
-      message: 'OTP sent to the admin email address',
-      expiresIn: OTP_TTL_MS / 1000
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+otpStore.set(normalizedEmail, {
+  hash: hashOtp(otp),
+  expiresAt: Date.now() + OTP_TTL_MS,
+  attempts: 0
+});
+
+console.log("Calling sendOTP...");
+
+await sendOTP(ADMIN_EMAIL, otp);
+
+console.log("Returned from sendOTP");
+
+return res.json({
+  message: 'OTP sent to the admin email address',
+  expiresIn: OTP_TTL_MS / 1000
+});
+
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
 });
 
 app.post('/api/admin/verify-otp', async (req, res) => {
