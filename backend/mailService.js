@@ -14,7 +14,7 @@ async function sendOTP(email, otp) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "TechWithTanziya <onboarding@resend.dev>",
+      from: "TechWithTanziya <admin@techwithtanziya.tech>",
       to: email,
       subject: "Your Admin Login OTP",
       html: `
