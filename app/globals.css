@@ -31,13 +31,19 @@
 }
 
 /* ===========================
-   RESET
+   RESET & FOUNDATION (Updated for scroll fixes)
 =========================== */
 
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    max-width: 100%; /* Prevent horizontal scrolling */
+}
+
+html, body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    width: 100%;
 }
 
 html{
@@ -49,6 +55,7 @@ body{
     background:var(--background);
     color:var(--text);
     -webkit-font-smoothing:antialiased;
+    position: relative; /* Setup relative flow */
 }
 
 a{
@@ -65,13 +72,20 @@ main{
     min-height:100vh;
 }
 
+::selection{
+    background:var(--primary);
+    color:white;
+}
+
 /* ===========================
    CONTAINER
 =========================== */
 
 .container{
-    width:min(1200px,calc(100% - 40px));
+    width:100%;
+    max-width:1200px;
     margin:auto;
+    padding:0 20px;
 }
 
 /* ===========================
@@ -138,7 +152,7 @@ section{
 }
 
 .card-copy{
-    color:var(--muted);
+    color:var(--text-secondary);
     line-height:1.8;
 }
 
@@ -151,7 +165,7 @@ section{
 .meta{
     display:block;
     margin-top:20px;
-    color:var(--muted);
+    color:var(--text-secondary);
 }
 
 .tag{
@@ -182,7 +196,7 @@ section{
 }
 
 .section-heading p{
-    color:var(--muted);
+    color:var(--text-secondary);
 }
 
 /* ===========================
@@ -260,6 +274,38 @@ section{
 }
 
 /* ===========================
+   HERO FIXES
+=========================== */
+
+.hero-buttons {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.hero-buttons a {
+    width: 100%;
+}
+
+.hero-tech {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    overflow: visible;
+}
+
+/* ===========================
+   EDITOR FIXES
+=========================== */
+
+.editor {
+    width: 100%;
+    max-width: 650px;
+    margin: auto;
+}
+
+/* ===========================
    RESPONSIVE
 =========================== */
 
@@ -283,7 +329,16 @@ section{
     }
 }
 
-::selection{
-    background:var(--primary);
-    color:white;
+@media(max-width:768px){
+    .hero {
+        padding: 60px 0;
+    }
+
+    .hero-left {
+        text-align: center;
+    }
+
+    .hero-left p {
+        margin: auto;
+    }
 }

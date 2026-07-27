@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 
 const styles = `
 .navbar { 
@@ -37,7 +38,8 @@ const styles = `
 }
 
 .logo h2 { 
-  font-size: 20px; 
+  font-size: 18px; 
+  white-space: nowrap;
   margin: 0; 
   font-family: Poppins, sans-serif;
   font-weight: 700;
@@ -110,7 +112,8 @@ nav a:hover {
 }
 
 .start-btn {
-  padding: 10px 24px; 
+  padding: 10px 18px; 
+  white-space: nowrap;
   border-radius: 10px; 
   color: white; 
   font-weight: 600; 
@@ -170,36 +173,90 @@ nav a:hover {
   margin: 4px 0;
 }
 
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: #333;
+}
+
+.mobile-nav {
+  display: none;
+}
+
 @media(max-width: 900px) {
   nav {
     gap: 20px;
   }
-
   nav a {
     font-size: 13px;
   }
-
   .navbar-container {
     height: 65px;
   }
 }
 
-@media(max-width: 768px) {
+@media (max-width: 768px) {
+  .navbar-container {
+    height: 70px;
+    padding: 0 15px;
+  }
+  
+  .logo h2 {
+    display: none;
+  }
+
   nav {
     display: none;
   }
 
-  .navbar-container {
-    height: 60px;
-  }
-
-  .logo h2 {
-    font-size: 18px;
-  }
-
-  .admin-btn, .start-btn {
+  .start-btn {
     padding: 8px 16px;
     font-size: 12px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    gap: 18px;
+    animation: slideDown 0.25s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-nav a {
+    text-decoration: none;
+    font-weight: 600;
+    color: #444;
+  }
+
+  .mobile-nav a:hover {
+    color: #7C3AED;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 `;
@@ -227,6 +284,7 @@ export function Navigation() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -257,6 +315,7 @@ export function Navigation() {
             <h2>TechWithTanziya</h2>
           </Link>
 
+          {/* Desktop Navigation */}
           <nav>
             {links.map((link) => (
               <Link
@@ -306,12 +365,38 @@ export function Navigation() {
                 </div>
               )}
             </div>
+            
             <Link href="/cheatsheets" className="start-btn">
               Start Learning
             </Link>
+
+            {/* Mobile Hamburger Button */}
+            <button 
+              className="mobile-menu-btn" 
+              onClick={() => setMobileMenu(!mobileMenu)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenu ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
 
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenu && (
+          <div className="mobile-nav">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenu(false)}
+                className={pathname === link.href ? "active-link" : ""}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </header>
     </>
   );

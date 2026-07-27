@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 const styles = `
 .hero {
@@ -35,11 +34,12 @@ const styles = `
 
 .hero-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: 80px;
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 .hero-left {
@@ -71,7 +71,7 @@ const styles = `
 }
 
 .hero-left h1 {
-  font-size: 4.2rem;
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
   font-family: Poppins, sans-serif;
   line-height: 1.2;
   margin: 25px 0;
@@ -84,7 +84,7 @@ const styles = `
   color: #666;
   line-height: 1.8;
   margin-bottom: 40px;
-  max-width: 550px;
+  max-width: 100%;
 }
 
 .hero-buttons {
@@ -135,9 +135,9 @@ const styles = `
 
 .hero-tech {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  gap: 10px;
+  overflow: visible;
 }
 
 .hero-tech span {
@@ -164,6 +164,7 @@ const styles = `
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   gap: 30px;
   animation: slideInRight 0.8s ease-out;
 }
@@ -181,6 +182,7 @@ const styles = `
 
 .editor {
   width: 100%;
+  max-width: 650px;
   background: #0f172a;
   border-radius: 20px;
   overflow: hidden;
@@ -239,72 +241,89 @@ const styles = `
   border-radius: 4px;
 }
 
-.hero-logo {
-  animation: float 4s ease-in-out infinite;
-  filter: drop-shadow(0 20px 40px rgba(124, 58, 237, 0.2));
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
-@media(max-width: 900px) {
+/* TABLET */
+@media (max-width: 900px) {
+  .hero {
+    padding: 80px 20px;
+  }
   .hero-container {
     grid-template-columns: 1fr;
-    gap: 50px;
+    gap: 40px;
+    text-align: center;
   }
-
+  .hero-left {
+    order: 1;
+  }
+  .hero-right {
+    order: 2;
+    width: 100%;
+  }
   .hero-left h1 {
-    font-size: 2.8rem;
+    line-height: 1.2;
   }
-
   .hero-left p {
-    font-size: 1rem;
+    margin: auto auto 35px;
   }
-
   .hero-buttons {
+    display: flex;
     flex-direction: column;
+    width: 100%;
   }
-
   .button {
     width: 100%;
   }
-
   .hero-tech {
     justify-content: center;
   }
-
-  .hero {
-    padding: 80px 0;
+  .editor {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
+/* LARGE MOBILE */
 @media(max-width: 600px) {
   .hero-left h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
-
   .hero-badge {
     font-size: 12px;
     padding: 10px 18px;
   }
-
   .button {
     padding: 12px 24px;
     font-size: 15px;
   }
-
   .editor pre {
     font-size: 13px;
     padding: 20px;
   }
 }
+
+/* SMALL MOBILE */
+@media (max-width: 480px) {
+  .hero {
+    padding: 60px 16px;
+  }
+  .hero-left h1 {
+    font-size: 2rem;
+  }
+  .hero-left p {
+    font-size: 15px;
+  }
+  .hero-badge {
+    padding: 8px 18px;
+  }
+  .editor pre {
+    font-size: 12px;
+    padding: 18px;
+  }
+}
 `;
 
 const technologies = [
-  " Quick References",
-  " Real Projects",
+  "Quick References",
+  "Real Projects",
   "Expert Articles",
   "Career Paths",
   "Best Practices",
@@ -376,7 +395,6 @@ export default function Hero() {
               </div>
               <pre>{codeSnippet}</pre>
             </div>
-
           </div>
         </div>
       </section>
