@@ -1,35 +1,6 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-let transporter;
-
-function getTransporter() {
-  if (transporter) {
-    return transporter;
-  }
-
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
-    throw new Error(
-      "EMAIL_USER and EMAIL_APP_PASSWORD must be configured for OTP delivery"
-    );
-  }
-
-  transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    family: 4, // Force IPv4
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_APP_PASSWORD,
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-  });
-
-  return transporter;
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendOTP(email, otp) {
   if (!email) {
@@ -39,56 +10,60 @@ async function sendOTP(email, otp) {
   console.log("=================================");
   console.log("📧 sendOTP() started");
   console.log("To:", email);
-  console.log("EMAIL_USER:", process.env.EMAIL_USER);
-  console.log(
-    "APP PASSWORD LENGTH:",
-    process.env.EMAIL_APP_PASSWORD
-      ? process.env.EMAIL_APP_PASSWORD.length
-      : "NOT SET"
-  );
   console.log("=================================");
 
-  const mailer = getTransporter();
-  console.log("✅ Transporter created");
-
   try {
-    const info = await mailer.sendMail({
-      from: `"TechWithTanziya Admin" <${process.env.EMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: "TechWithTanziya <onboarding@resend.dev>",
       to: email,
       subject: "Your Admin Login OTP",
       html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-          <h2 style="margin-bottom:10px;">Admin Login OTP</h2>
+        <div style="font-family: Arial, sans-serif; max-width:600px; margin:auto;">
+          <h2 style="color:#2563eb;">TechWithTanziya Admin Login</h2>
 
-          <p>Use the following OTP to log in:</p>
+          <p>Hello,</p>
+
+          <p>Your One-Time Password (OTP) is:</p>
 
           <div style="
-            font-size:32px;
+            font-size:36px;
             font-weight:bold;
-            letter-spacing:6px;
-            color:#2563eb;
-            margin:20px 0;
+            letter-spacing:8px;
+            color:#111827;
+            background:#f3f4f6;
+            padding:20px;
+            border-radius:8px;
+            text-align:center;
           ">
             ${otp}
           </div>
 
-          <p>This OTP is valid for <strong>5 minutes</strong>.</p>
+          <p style="margin-top:20px;">
+            This OTP is valid for <strong>5 minutes</strong>.
+          </p>
 
-          <p>If you did not request this OTP, you can safely ignore this email.</p>
+          <p>If you didn't request this login, you can safely ignore this email.</p>
 
           <hr>
 
-          <small>TechWithTanziya Admin Panel</small>
+          <p style="color:#6b7280;font-size:13px;">
+            © TechWithTanziya
+          </p>
         </div>
       `,
     });
 
-    console.log("✅ Email sent successfully");
-    console.log(info.response);
+    if (error) {
+      console.error("❌ Resend Error:", error);
+      throw new Error(error.message);
+    }
 
-    return info;
+    console.log("✅ Email sent successfully");
+    console.log(data);
+
+    return data;
   } catch (err) {
-    console.error("❌ sendMail failed");
+    console.error("❌ sendOTP failed");
     console.error(err);
     throw err;
   }
