@@ -6,7 +6,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
 const { CheatSheet, Blog, Project, Resource, Roadmap, User } = require('./models');
-const { listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFolderRecursive } = require('./googleDrive');
+const { drive,listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFolderRecursive } = require('./googleDrive');
 const sendOTP = require('./mailService');
 
 const app = express();
@@ -114,12 +114,16 @@ app.post('/api/admin/request-otp', async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }
+const normalizedEmail = normalizeEmail(email);
 
-    const normalizedEmail = normalizeEmail(email);
-    if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL)) {
-      return res.status(401).json({ error: 'Invalid admin account' });
-    }
+console.log("=================================");
+console.log("ADMIN_EMAIL:", ADMIN_EMAIL);
+console.log("Entered Email:", normalizedEmail);
+console.log("=================================");
 
+if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL)) {
+  return res.status(401).json({ error: 'Invalid admin account' });
+}
     if (!ADMIN_EMAIL) {
       return res.status(500).json({ error: 'Admin email is not configured' });
     }
@@ -217,27 +221,39 @@ app.get('/api/drive/folders/:folderId/images', async (req, res) => {
   }
 });
 
+
 // ================================
 // Drive - Proxy image by file ID
 // ================================
-app.get('/api/drive/image/:fileId', async (req, res) => {
+app.get("/api/drive/image/:fileId", async (req, res) => {
   try {
-    const { google } = require('googleapis');
-    const path = require('path');
-    const auth = new google.auth.GoogleAuth({
-      keyFile: path.resolve(__dirname, process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH),
-      scopes: ['https://www.googleapis.com/auth/drive.readonly']
-    });
-    const drive = google.drive({ version: 'v3', auth });
-    const driveRes = await drive.files.get(
-      { fileId: req.params.fileId, alt: 'media' },
-      { responseType: 'stream' }
+    const response = await drive.files.get(
+      {
+        fileId: req.params.fileId,
+        alt: "media",
+      },
+      {
+        responseType: "stream",
+      }
     );
-    res.setHeader('Content-Type', driveRes.headers['content-type'] || 'image/jpeg');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    driveRes.data.pipe(res);
+
+    res.setHeader(
+      "Content-Type",
+      response.headers["content-type"] || "image/jpeg"
+    );
+
+    res.setHeader(
+      "Cache-Control",
+      "public, max-age=86400"
+    );
+
+    response.data.pipe(res);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Drive image error:", error.message);
+
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
@@ -319,13 +335,14 @@ app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
         })
       );
 
-      const items = files.map((f) => ({
-        id: f.id,
-        name: f.name,
-        previewUrl: `https://drive.google.com/file/d/${f.id}/preview`,
-        downloadUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
-      }));
+   const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
 
+const items = files.map((f) => ({
+  id: f.id,
+  name: f.name,
+  previewUrl: `${backendUrl}/api/drive/image/${f.id}`,
+  downloadUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
+}));
       return res.json({ images: items });
     }
 
@@ -334,46 +351,83 @@ app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
     }
 
     const id = sheet.googleDriveId;
+const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
 
-    return res.json({
-      images: [
-        {
-          id,
-          name: sheet.title,
-          previewUrl: `https://drive.google.com/file/d/${id}/preview`,
-          downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`,
-        },
-      ],
-    });
+return res.json({
+  images: [
+    {
+      id,
+      name: sheet.title,
+      previewUrl: `${backendUrl}/api/drive/image/${id}`,
+      downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`,
+    },
+  ],
+});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.post('/api/cheatsheets', authMiddleware, async (req, res) => {
+app.get("/api/cheatsheets/:slug/drive", async (req, res) => {
   try {
-    const { slug, title, description, category, googleDriveId, googleDriveFolderId, topics, highlights, interviews } = req.body;
-    if (!slug || !title || !googleDriveId)
-      return res.status(400).json({ error: 'slug, title and googleDriveId are required' });
-    const sheet = await CheatSheet.findOneAndUpdate(
-      { slug },
-      {
-        slug,
-        title,
-        description,
-        category,
-        googleDriveId,
-        googleDriveFolderId,
-        topics,
-        highlights,
-        interviews,
-        updatedAt: new Date()
-      },
-      { upsert: true, new: true }
-    );
-    res.json(sheet);
+    const sheet = await CheatSheet.findOne({
+      slug: req.params.slug,
+    }).select("googleDriveId googleDriveFolderId title");
+
+    if (!sheet) {
+      return res.status(404).json({
+        error: "No drive link found",
+      });
+    }
+
+    const backendUrl =
+      process.env.BACKEND_URL ||
+      `http://localhost:${process.env.PORT || 5000}`;
+
+    if (sheet.googleDriveFolderId) {
+      const files = await listImagesInFolderRecursive(
+        sheet.googleDriveFolderId
+      );
+
+      files.sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        })
+      );
+
+      return res.json({
+        images: files.map((file) => ({
+          id: file.id,
+          name: file.name,
+          previewUrl: `${backendUrl}/api/drive/image/${file.id}`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${file.id}`,
+        })),
+      });
+    }
+
+    if (!sheet.googleDriveId) {
+      return res.status(404).json({
+        error: "No drive link found",
+      });
+    }
+
+    return res.json({
+      images: [
+        {
+          id: sheet.googleDriveId,
+          name: sheet.title,
+          previewUrl: `${backendUrl}/api/drive/image/${sheet.googleDriveId}`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${sheet.googleDriveId}`,
+        },
+      ],
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 

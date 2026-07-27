@@ -184,13 +184,12 @@ const styles = `
   position: relative;
   border: 1px solid #E5E7EB;
 }
-
-.image-section iframe {
+.image-section img {
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: 600px;
-  border: none;
-  background: white;
+  display: block;
+  object-fit: contain;
 }
 
 .no-image {
@@ -536,11 +535,17 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
               ) : (
                 <div className="image-section">
                   {previewUrl ? (
-                    <iframe
-                      src={previewUrl}
-                      allow="autoplay"
-                      title={`${sheet?.title} Preview`}
-                    />
+                     <img
+    src={previewUrl}
+    alt={`${sheet?.title} Preview`}
+    style={{
+      width: "100%",
+      height: "auto",
+      display: "block",
+      borderRadius: "12px",
+      objectFit: "contain"
+    }}
+  />
                   ) : (
                     <div className="no-image">
                       <span style={{ fontSize: '32px' }}>📋</span>
