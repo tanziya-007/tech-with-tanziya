@@ -5,18 +5,23 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
+// Local Imports
+const subscriberRoutes = require("./routes/subscriberRoutes");
 const { CheatSheet, Blog, Project, Resource, Roadmap, User } = require('./models');
-const { drive,listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFolderRecursive } = require('./googleDrive');
+const { drive, listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFolderRecursive } = require('./googleDrive');
 const sendOTP = require('./mailService');
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-const OTP_TTL_MS = 5 * 60 * 1000;
+const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const OTP_MAX_ATTEMPTS = 5;
 const otpStore = new Map();
 
+// ================================
+// Utility Functions
+// ================================
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
@@ -39,32 +44,41 @@ function getOtpRecord(username) {
   return record;
 }
 
-// CORS: allow a comma-separated list via CORS_ORIGIN, e.g.
-// CORS_ORIGIN="http://localhost:3000,https://tech-with-tanziya-rg1z.vercel.app"
+// ================================
+// CORS Configuration
+// ================================
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
-  console.log("CORS_ORIGIN ENV:", process.env.CORS_ORIGIN);
+  
+console.log("CORS_ORIGIN ENV:", process.env.CORS_ORIGIN);
 console.log("Allowed Origins:", allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
-    console.log("Incoming Origin:", origin);
-
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-
     console.log("Rejected Origin:", origin);
     return callback(new Error("Not allowed by CORS"));
   },
   credentials: true
 }));
 
+// ================================
+// Body Parsers (MUST BE BEFORE ROUTES)
+// ================================
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ================================
+// Routes
+// ================================
+app.use("/api/subscribers", subscriberRoutes);
 
 // ================================
 // MongoDB Connection
@@ -77,14 +91,18 @@ mongoose.connect(process.env.MONGODB_URI)
 // Auth Middleware
 // ================================
 function authMiddleware(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(' ')[1];
+  
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  
   try {
     req.admin = jwt.verify(token, JWT_SECRET);
     next();
   } catch (err) {
-    if (err.name === 'TokenExpiredError')
+    if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token expired, please log in again' });
+    }
     res.status(401).json({ error: 'Invalid token' });
   }
 }
@@ -110,49 +128,38 @@ app.get('/api/health', (req, res) => {
 app.post('/api/admin/request-otp', async (req, res) => {
   try {
     const { email } = req.body;
-
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }
-const normalizedEmail = normalizeEmail(email);
 
-console.log("=================================");
-console.log("ADMIN_EMAIL:", ADMIN_EMAIL);
-console.log("Entered Email:", normalizedEmail);
-console.log("=================================");
+    const normalizedEmail = normalizeEmail(email);
 
-if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL)) {
-  return res.status(401).json({ error: 'Invalid admin account' });
-}
+    if (normalizedEmail !== normalizeEmail(ADMIN_EMAIL)) {
+      return res.status(401).json({ error: 'Invalid admin account' });
+    }
     if (!ADMIN_EMAIL) {
       return res.status(500).json({ error: 'Admin email is not configured' });
     }
 
- const otp = generateOtp();
+    const otp = generateOtp();
+    
+    otpStore.set(normalizedEmail, {
+      hash: hashOtp(otp),
+      expiresAt: Date.now() + OTP_TTL_MS,
+      attempts: 0
+    });
 
-console.log("OTP Generated:", otp);
+    await sendOTP(ADMIN_EMAIL, otp);
 
-otpStore.set(normalizedEmail, {
-  hash: hashOtp(otp),
-  expiresAt: Date.now() + OTP_TTL_MS,
-  attempts: 0
-});
+    return res.json({
+      message: 'OTP sent to the admin email address',
+      expiresIn: OTP_TTL_MS / 1000
+    });
 
-console.log("Calling sendOTP...");
-
-await sendOTP(ADMIN_EMAIL, otp);
-
-console.log("Returned from sendOTP");
-
-return res.json({
-  message: 'OTP sent to the admin email address',
-  expiresIn: OTP_TTL_MS / 1000
-});
-
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ error: error.message });
-}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.post('/api/admin/verify-otp', async (req, res) => {
@@ -187,9 +194,10 @@ app.post('/api/admin/verify-otp', async (req, res) => {
     }
 
     otpStore.delete(normalizedEmail);
+    
     const user = await User.findOne({ username: ADMIN_USERNAME });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid admin account' });
+      return res.status(401).json({ error: 'Invalid admin account in database' });
     }
 
     const token = jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
@@ -217,7 +225,7 @@ app.get('/api/drive/folders', async (req, res) => {
 app.get('/api/drive/folders/:folderId/images', async (req, res) => {
   try {
     const images = await listImagesInFolderRecursive(req.params.folderId);
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
     const result = images.map(f => ({
       id: f.id,
       name: f.name,
@@ -230,53 +238,39 @@ app.get('/api/drive/folders/:folderId/images', async (req, res) => {
   }
 });
 
-
 // ================================
 // Drive - Proxy image by file ID
 // ================================
 app.get("/api/drive/image/:fileId", async (req, res) => {
   try {
     const response = await drive.files.get(
-      {
-        fileId: req.params.fileId,
-        alt: "media",
-      },
-      {
-        responseType: "stream",
-      }
+      { fileId: req.params.fileId, alt: "media" },
+      { responseType: "stream" }
     );
 
-    res.setHeader(
-      "Content-Type",
-      response.headers["content-type"] || "image/jpeg"
-    );
-
-    res.setHeader(
-      "Cache-Control",
-      "public, max-age=86400"
-    );
-
+    res.setHeader("Content-Type", response.headers["content-type"] || "image/jpeg");
+    res.setHeader("Cache-Control", "public, max-age=86400");
     response.data.pipe(res);
   } catch (error) {
     console.error("Drive image error:", error.message);
-
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
 // ================================
-// Sync Drive → DB (public, auto-syncs cheat sheets from Drive subfolders)
+// Sync Drive → DB
 // ================================
 app.post('/api/sync-drive', async (req, res) => {
   try {
     const folders = await listSubFolders(process.env.GOOGLE_DRIVE_FOLDER_ID);
     const synced = [];
+    
     for (const folder of folders) {
       const slug = folder.name.toLowerCase().replace(/\s+/g, '-');
       const images = await listImagesInFolder(folder.id);
+      
       if (!images.length) continue;
+      
       await CheatSheet.findOneAndUpdate(
         { slug },
         {
@@ -290,9 +284,11 @@ app.post('/api/sync-drive', async (req, res) => {
       );
       synced.push(slug);
     }
+    
     // Remove DB entries whose slug no longer matches any Drive folder
     const driveSlugs = folders.map(f => f.name.toLowerCase().replace(/\s+/g, '-'));
     await CheatSheet.deleteMany({ slug: { $nin: driveSlugs } });
+    
     res.json({ synced });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -310,21 +306,18 @@ app.get('/api/cheatsheets', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 app.get('/api/cheatsheets/:slug', async (req, res) => {
   try {
     const sheet = await CheatSheet.findOne({ slug: req.params.slug });
-
-    if (!sheet) {
-      return res.status(404).json({ error: "Not found" });
-    }
-
+    if (!sheet) return res.status(404).json({ error: "Not found" });
     res.json(sheet);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
+app.get("/api/cheatsheets/:slug/drive", async (req, res) => {
   try {
     const sheet = await CheatSheet.findOne({ slug: req.params.slug })
       .select("googleDriveId googleDriveFolderId title");
@@ -332,6 +325,8 @@ app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
     if (!sheet) {
       return res.status(404).json({ error: "No drive link found" });
     }
+
+    const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
 
     if (sheet.googleDriveFolderId) {
       const files = await listImagesInFolderRecursive(sheet.googleDriveFolderId);
@@ -344,99 +339,32 @@ app.get('/api/cheatsheets/:slug/drive', async (req, res) => {
         })
       );
 
-   const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
-
-const items = files.map((f) => ({
-  id: f.id,
-  name: f.name,
-  previewUrl: `${backendUrl}/api/drive/image/${f.id}`,
-  downloadUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
-}));
-      return res.json({ images: items });
+      return res.json({
+        images: files.map((f) => ({
+          id: f.id,
+          name: f.name,
+          previewUrl: `${backendUrl}/api/drive/image/${f.id}`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
+        })),
+      });
     }
 
     if (!sheet.googleDriveId) {
       return res.status(404).json({ error: "No drive link found" });
     }
 
-    const id = sheet.googleDriveId;
-const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
-
-return res.json({
-  images: [
-    {
-      id,
-      name: sheet.title,
-      previewUrl: `${backendUrl}/api/drive/image/${id}`,
-      downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`,
-    },
-  ],
-});
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.get("/api/cheatsheets/:slug/drive", async (req, res) => {
-  try {
-    const sheet = await CheatSheet.findOne({
-      slug: req.params.slug,
-    }).select("googleDriveId googleDriveFolderId title");
-
-    if (!sheet) {
-      return res.status(404).json({
-        error: "No drive link found",
-      });
-    }
-
-    const backendUrl =
-      process.env.BACKEND_URL ||
-      `http://localhost:${process.env.PORT || 5000}`;
-
-    if (sheet.googleDriveFolderId) {
-      const files = await listImagesInFolderRecursive(
-        sheet.googleDriveFolderId
-      );
-
-      files.sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, {
-          numeric: true,
-          sensitivity: "base",
-        })
-      );
-
-      return res.json({
-        images: files.map((file) => ({
-          id: file.id,
-          name: file.name,
-          previewUrl: `${backendUrl}/api/drive/image/${file.id}`,
-          downloadUrl: `https://drive.google.com/uc?export=download&id=${file.id}`,
-        })),
-      });
-    }
-
-    if (!sheet.googleDriveId) {
-      return res.status(404).json({
-        error: "No drive link found",
-      });
-    }
-
+    // Fallback for single drive ID
     return res.json({
-      images: [
-        {
-          id: sheet.googleDriveId,
-          name: sheet.title,
-          previewUrl: `${backendUrl}/api/drive/image/${sheet.googleDriveId}`,
-          downloadUrl: `https://drive.google.com/uc?export=download&id=${sheet.googleDriveId}`,
-        },
-      ],
+      images: [{
+        id: sheet.googleDriveId,
+        name: sheet.title,
+        previewUrl: `${backendUrl}/api/drive/image/${sheet.googleDriveId}`,
+        downloadUrl: `https://drive.google.com/uc?export=download&id=${sheet.googleDriveId}`,
+      }],
     });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -465,8 +393,10 @@ app.get('/api/blogs/:slug', async (req, res) => {
 app.post('/api/blogs', authMiddleware, async (req, res) => {
   try {
     const { slug, title, description, category, date, content } = req.body;
-    if (!slug || !title || !content)
+    if (!slug || !title || !content) {
       return res.status(400).json({ error: 'slug, title and content are required' });
+    }
+      
     const blog = await Blog.findOneAndUpdate(
       { slug },
       { slug, title, description, category, date: date || new Date(), content, updatedAt: new Date() },
@@ -512,11 +442,14 @@ app.get('/api/projects/:slug', async (req, res) => {
 app.post('/api/projects', authMiddleware, async (req, res) => {
   try {
     let { slug, title, description, tech, github, demo, googleDriveFolderId } = req.body;
+    
     if (!slug || !title) return res.status(400).json({ error: 'slug and title are required' });
+    
     if (googleDriveFolderId) {
       const match = googleDriveFolderId.match(/folders\/([a-zA-Z0-9_-]+)/);
       if (match) googleDriveFolderId = match[1];
     }
+    
     const project = await Project.findOneAndUpdate(
       { slug },
       { slug, title, description, tech, github, demo, googleDriveFolderId, updatedAt: new Date() },
@@ -562,11 +495,14 @@ app.get('/api/resources/:slug', async (req, res) => {
 app.post('/api/resources', authMiddleware, async (req, res) => {
   try {
     let { slug, title, description, tag, link, googleDriveId } = req.body;
+    
     if (!slug || !title) return res.status(400).json({ error: 'slug and title are required' });
+    
     if (googleDriveId) {
       const match = googleDriveId.match(/\/d\/([a-zA-Z0-9_-]+)/);
       if (match) googleDriveId = match[1];
     }
+    
     const resource = await Resource.findOneAndUpdate(
       { slug },
       { slug, title, description, tag, link, googleDriveId, updatedAt: new Date() },
@@ -599,10 +535,22 @@ app.get('/api/roadmaps', async (req, res) => {
   }
 });
 
+app.get('/api/roadmaps/:slug', async (req, res) => {
+  try {
+    const roadmap = await Roadmap.findOne({ slug: req.params.slug });
+    if (!roadmap) return res.status(404).json({ error: 'Not found' });
+    res.json(roadmap);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/roadmaps', authMiddleware, async (req, res) => {
   try {
     let { slug, title, description, googleDriveFolderId, googleDrivePdfId } = req.body;
+    
     if (!slug || !title) return res.status(400).json({ error: 'slug and title are required' });
+    
     if (googleDriveFolderId) {
       const match = googleDriveFolderId.match(/folders\/([a-zA-Z0-9_-]+)/);
       if (match) googleDriveFolderId = match[1];
@@ -611,6 +559,7 @@ app.post('/api/roadmaps', authMiddleware, async (req, res) => {
       const match = googleDrivePdfId.match(/\/d\/([a-zA-Z0-9_-]+)/);
       if (match) googleDrivePdfId = match[1];
     }
+    
     const roadmap = await Roadmap.findOneAndUpdate(
       { slug },
       { slug, title, description, googleDriveFolderId, googleDrivePdfId, updatedAt: new Date() },
@@ -631,14 +580,12 @@ app.delete('/api/roadmaps/:slug', authMiddleware, async (req, res) => {
   }
 });
 
-app.get('/api/roadmaps/:slug', async (req, res) => {
-  try {
-    const roadmap = await Roadmap.findOne({ slug: req.params.slug });
-    if (!roadmap) return res.status(404).json({ error: 'Not found' });
-    res.json(roadmap);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+// ================================
+// Global Error Handler
+// ================================
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err.stack);
+  res.status(500).json({ error: 'Something went wrong on the server!' });
 });
 
 // ================================
