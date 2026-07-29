@@ -154,8 +154,8 @@ export default function BlogDetailPage({ params: paramsPromise }: PageProps) {
                   <h1>{blog.title}</h1>
                   {blog.description && <p>{blog.description}</p>}
                   <div className="blog-meta">
-                    <span>📅 {new Date(blog.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                    <span>✍️ TechWithTanziya</span>
+                    <span> {new Date(blog.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    <span> TechWithTanziya</span>
                   </div>
                 </div>
 
