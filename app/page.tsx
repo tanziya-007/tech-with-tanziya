@@ -465,6 +465,10 @@ export default function HomePage() {
   const [roadmapList, setRoadmapList] = useState(roadmaps);
   const [resourceList, setResourceList] = useState(resources);
 
+  // New states for the newsletter subscription
+  const [email, setEmail] = useState('');
+  const [subscribeStatus, setSubscribeStatus] = useState('');
+
   useEffect(() => {
     fetchCheatSheets()
       .then(data => setSheets(data.filter((s: any) => s.googleDriveId)))
@@ -474,6 +478,38 @@ export default function HomePage() {
     fetchRoadmaps().then(setRoadmapList).catch(() => {});
     fetchResources().then(setResourceList).catch(() => {});
   }, []);
+
+  // Handle newsletter subscription
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubscribeStatus(''); // Clear previous messages
+
+    // 1. Basic Regex Validation for Email Format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setSubscribeStatus('❌ Please enter a valid email address.');
+      return;
+    }
+
+    // 2. Send to your Next.js API Route
+    try {
+      // Changed this line to point directly to your new Next.js route!
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok) {
+        setSubscribeStatus('✅ Successfully subscribed!');
+        setEmail(''); // Clear the input field
+      } else {
+        setSubscribeStatus('❌ Failed to subscribe. Please try again.');
+      }
+    } catch (error) {
+      setSubscribeStatus('❌ An error occurred. Is the server running?');
+    }
+  };
 
   return (
     <>
@@ -540,90 +576,90 @@ export default function HomePage() {
 
         {/* ================================= CHEAT SHEETS ================================= */}
         <section className="contentSection">
-  <div className="container">
-    <SectionHeading
-      title="Latest Cheat Sheets"
-      description="Quick references for faster learning."
-      action={
-        <Link href="/cheatsheets" className="button button-secondary">
-          View All
-        </Link>
-      }
-    />
+          <div className="container">
+            <SectionHeading
+              title="Latest Cheat Sheets"
+              description="Quick references for faster learning."
+              action={
+                <Link href="/cheatsheets" className="button button-secondary">
+                  View All
+                </Link>
+              }
+            />
 
-    <div className="contentGrid">
-      {[...sheets]
-        .sort((a, b) => {
-          const aNum = parseInt(a.title.match(/^\d+/)?.[0] || "0", 10);
-          const bNum = parseInt(b.title.match(/^\d+/)?.[0] || "0", 10);
-          return aNum - bNum;
-        })
-        .slice(0, 6)
-        .map((sheet) => {
-          const logo = getTechLogo(sheet.title) || getTechLogo(sheet.slug);
+            <div className="contentGrid">
+              {[...sheets]
+                .sort((a, b) => {
+                  const aNum = parseInt(a.title.match(/^\d+/)?.[0] || "0", 10);
+                  const bNum = parseInt(b.title.match(/^\d+/)?.[0] || "0", 10);
+                  return aNum - bNum;
+                })
+                .slice(0, 6)
+                .map((sheet) => {
+                  const logo = getTechLogo(sheet.title) || getTechLogo(sheet.slug);
 
-          return (
-            <Link
-              key={sheet.slug}
-              href={`/cheatsheets/${sheet.slug}`}
-              className="contentCard"
-            >
-              <div
-                className="cardTop"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                }}
-              >
-                <div
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 12,
-                    background:
-                      "linear-gradient(135deg,#f3e8ff,#fce7f3)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 10,
-                    flexShrink: 0,
-                  }}
-                >
-                  {logo ? (
-                    <img
-                      src={logo}
-                      alt={sheet.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: 24 }}>📘</span>
-                  )}
-                </div>
+                  return (
+                    <Link
+                      key={sheet.slug}
+                      href={`/cheatsheets/${sheet.slug}`}
+                      className="contentCard"
+                    >
+                      <div
+                        className="cardTop"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 14,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 12,
+                            background:
+                              "linear-gradient(135deg,#f3e8ff,#fce7f3)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 10,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {logo ? (
+                            <img
+                              src={logo}
+                              alt={sheet.title}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
+                              }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: 24 }}>📘</span>
+                          )}
+                        </div>
 
-                {sheet.category && (
-                  <span className="cardCategory">
-                    {sheet.category}
-                  </span>
-                )}
-              </div>
+                        {sheet.category && (
+                          <span className="cardCategory">
+                            {sheet.category}
+                          </span>
+                        )}
+                      </div>
 
-              <h3>{sheet.title.replace(/^\d+\.\s*/, "")}</h3>
-              <p>{sheet.description}</p>
+                      <h3>{sheet.title.replace(/^\d+\.\s*/, "")}</h3>
+                      <p>{sheet.description}</p>
 
-              <div className="cardBottom">
-                <span>Read Guide</span>
-              </div>
-            </Link>
-          );
-        })}
-    </div>
-  </div>
-</section>
+                      <div className="cardBottom">
+                        <span>Read Guide</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+            </div>
+          </div>
+        </section>
 
         {/* ================================= BLOGS ================================= */}
         <section className="contentSection alternate">
@@ -817,15 +853,26 @@ export default function HomePage() {
                 are published.
               </p>
             </div>
-            <form className="newsletterForm">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-              />
-              <button type="submit" className="button button-primary">
-                Subscribe
-              </button>
-            </form>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <form className="newsletterForm" onSubmit={handleSubscribe}>
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <button type="submit" className="button button-primary">
+                  Subscribe
+                </button>
+              </form>
+              {/* Conditional rendering for success or error messages */}
+              {subscribeStatus && (
+                <p style={{ fontSize: '14px', fontWeight: '600', color: subscribeStatus.includes('✅') ? '#25D366' : '#EF4444' }}>
+                  {subscribeStatus}
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
