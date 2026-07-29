@@ -8,24 +8,39 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { fetchBlogs } from "@/lib/api";
 
 const styles = `
+@keyframes slideInUp { 
+  from { opacity: 0; transform: translateY(30px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+
 .blogs-page { 
   padding: 100px 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f9f7ff 100%);
+  background: var(--bg);
+  min-height: 100vh;
+  transition: background 0.5s ease;
 }
 
 .blog-card { 
-  background: white; 
+  background: var(--surface); 
   border-radius: 24px; 
   overflow: hidden; 
   text-decoration: none; 
   color: inherit; 
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08); 
-  transition: 0.4s; 
+  box-shadow: var(--shadow); 
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
   display: flex; 
   flex-direction: column; 
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--border);
   position: relative;
+  animation: slideInUp 0.6s ease-out backwards;
 }
+
+/* Staggered load effect */
+.blog-card:nth-child(2) { animation-delay: 0.1s; }
+.blog-card:nth-child(3) { animation-delay: 0.2s; }
+.blog-card:nth-child(4) { animation-delay: 0.3s; }
+.blog-card:nth-child(5) { animation-delay: 0.4s; }
+.blog-card:nth-child(6) { animation-delay: 0.5s; }
 
 .blog-card::before {
   content: '';
@@ -34,14 +49,20 @@ const styles = `
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #7C3AED, #EC4899);
+  background: var(--gradient);
   border-radius: 24px 24px 0 0;
+  opacity: 0.8;
+  transition: 0.4s;
 }
 
 .blog-card:hover { 
   transform: translateY(-12px); 
-  box-shadow: 0 30px 70px rgba(124, 58, 237, 0.15); 
-  border-color: #7C3AED;
+  box-shadow: var(--shadow-hover); 
+  border-color: var(--primary);
+}
+
+.blog-card:hover::before {
+  opacity: 1;
 }
 
 .blog-content { 
@@ -53,30 +74,37 @@ const styles = `
 
 .blog-category { 
   display: inline-block; 
-  background: linear-gradient(135deg, #F3E8FF, #FCE7F3);
-  color: #7C3AED; 
+  background: var(--tag-bg);
+  color: var(--tag-text); 
   padding: 8px 16px; 
   border-radius: 30px; 
   font-size: 13px; 
   font-weight: 700;
   width: max-content; 
   margin-bottom: 18px;
-  border: 1px solid #E9D5FF;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.blog-card:hover .blog-category {
+  border-color: var(--primary);
 }
 
 .blog-content h3 { 
   font-size: 26px; 
   margin-bottom: 15px; 
-  font-family: Poppins, sans-serif;
-  color: #111827;
+  font-family: 'Poppins', sans-serif;
+  color: var(--text);
   line-height: 1.3;
+  transition: color 0.3s ease;
 }
 
 .blog-content p { 
-  color: #666; 
+  color: var(--text-secondary); 
   line-height: 1.8; 
   flex: 1;
   font-size: 15px;
+  transition: color 0.3s ease;
 }
 
 .blog-footer { 
@@ -85,19 +113,21 @@ const styles = `
   justify-content: space-between; 
   align-items: center; 
   font-size: 14px; 
-  color: #999;
+  color: var(--text-secondary);
   padding-top: 20px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--border);
+  transition: border-color 0.3s ease;
 }
 
 .read-blog { 
-  color: #7C3AED; 
+  color: var(--primary); 
   font-weight: 700; 
   transition: 0.3s;
 }
 
 .blog-card:hover .read-blog { 
   transform: translateX(6px);
+  color: var(--secondary);
 }
 
 .cards { 
@@ -149,10 +179,12 @@ export default function BlogPage() {
               description="Explore programming tutorials, study plans, interview tips and learning experiences."
             />
 
-            {loading && <p style={{ textAlign: 'center', color: '#9CA3AF' }}>Loading...</p>}
+            {loading && <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Loading...</p>}
+            
             {!loading && blogPosts.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#9CA3AF' }}>No blog posts published yet.</p>
+              <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No blog posts published yet.</p>
             )}
+            
             <div className="cards">
               {blogPosts.map((blog) => (
                 <Link

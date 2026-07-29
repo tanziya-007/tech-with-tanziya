@@ -6,7 +6,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
 // Local Imports
-const subscriberRoutes = require("./routes/subscriberRoutes");
+
 const { CheatSheet, Blog, Project, Resource, Roadmap, User } = require('./models');
 const { drive, listFilesFromFolder, listSubFolders, listImagesInFolder, listImagesInFolderRecursive } = require('./googleDrive');
 const sendOTP = require('./mailService');
@@ -78,7 +78,7 @@ app.use(express.urlencoded({ extended: true }));
 // ================================
 // Routes
 // ================================
-app.use("/api/subscribers", subscriberRoutes);
+
 
 // ================================
 // MongoDB Connection

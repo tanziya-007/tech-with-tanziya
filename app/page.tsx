@@ -43,17 +43,19 @@ const styles = `
     margin: 20px 0;
     font-family: 'Poppins', sans-serif;
     line-height: 1.2;
+    color: var(--text);
 }
 
 .sectionTag {
     display: inline-flex;
     padding: 10px 18px;
-    background: #F3E8FF;
-    color: var(--primary);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(236, 72, 153, 0.1));
+    color: #7C3AED;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 1px;
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .featureGrid {
@@ -64,17 +66,17 @@ const styles = `
 
 .featureCard {
     background: var(--surface);
-    border-radius: var(--radius-lg);
+    border-radius: 24px;
     padding: 35px;
     border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition-smooth);
+    box-shadow: var(--shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .featureCard:hover {
     transform: translateY(-8px) scale(1.01);
-    box-shadow: var(--shadow-premium);
-    border-color: var(--primary);
+    box-shadow: 0 25px 50px rgba(124, 58, 237, 0.15);
+    border-color: #7C3AED;
 }
 
 .featureNumber {
@@ -84,7 +86,7 @@ const styles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--gradient);
+    background: linear-gradient(135deg, #7C3AED, #EC4899);
     color: #fff;
     font-weight: 700;
     margin-bottom: 25px;
@@ -93,6 +95,12 @@ const styles = `
 .featureCard h3 {
     margin-bottom: 18px;
     font-size: 24px;
+    color: var(--text);
+}
+
+.featureCard p {
+    color: var(--text-secondary);
+    line-height: 1.7;
 }
 
 /* ===========================
@@ -100,10 +108,12 @@ const styles = `
 =========================== */
 .contentSection {
     padding: 60px 0;
+    background: var(--bg);
+    transition: background 0.5s ease;
 }
 
 .alternate {
-    background: var(--background);
+    background: var(--surface-alt);
 }
 
 .contentGrid {
@@ -114,19 +124,35 @@ const styles = `
 
 .contentCard {
     background: var(--surface);
-    border-radius: var(--radius-lg);
+    border-radius: 24px;
     border: 1px solid var(--border);
     padding: 32px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition-smooth);
+    box-shadow: var(--shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
 }
 
-.contentCard:hover {
+.contentCard::before, .blogCard::before, .projectCard::before, .roadmapCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #7C3AED, #EC4899);
+    opacity: 0.8;
+    transition: 0.4s;
+}
+
+.contentCard:hover, .blogCard:hover, .projectCard:hover, .roadmapCard:hover {
     transform: translateY(-8px) scale(1.01);
-    box-shadow: var(--shadow-premium);
-    border-color: var(--primary);
+    box-shadow: 0 25px 50px rgba(124, 58, 237, 0.15);
+    border-color: #7C3AED;
 }
 
 .cardTop {
@@ -137,26 +163,35 @@ const styles = `
     display: inline-flex;
     padding: 8px 18px;
     border-radius: 50px;
-    background: #F3E8FF;
-    color: var(--primary);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(236, 72, 153, 0.1));
+    color: #7C3AED;
     font-size: 13px;
     font-weight: 600;
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
-.contentCard h3, .blogContent h3 {
-    font-size: 24px;
-    margin-bottom: 18px;
+.contentCard h3, .blogContent h3, .projectContent h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
     font-family: 'Poppins', sans-serif;
+    color: var(--text);
+    line-height: 1.4;
 }
 
-.contentCard p {
+.contentCard p, .blogContent p, .projectContent p {
     flex: 1;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 15px;
 }
 
-.cardBottom {
+.cardBottom, .blogFooter, .projectFooter, .roadmapFooter {
     margin-top: 35px;
-    color: var(--primary);
+    color: #7C3AED;
     font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* ===========================
@@ -164,50 +199,36 @@ const styles = `
 =========================== */
 .blogCard {
     overflow: hidden;
-    border-radius: var(--radius-lg);
+    border-radius: 24px;
     background: var(--surface);
     border: 1px solid var(--border);
-    transition: var(--transition-smooth);
+    box-shadow: var(--shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
-}
-
-.blogCard:hover {
-    transform: translateY(-8px) scale(1.01);
-    box-shadow: var(--shadow-premium);
-    border-color: var(--primary);
-}
-
-.blogCover {
-    height: 220px;
-    background: var(--gradient);
+    text-decoration: none;
+    color: inherit;
     position: relative;
 }
 
-.blogOverlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    letter-spacing: 2px;
-    font-weight: 700;
-}
-
 .blogContent {
-    padding: 30px;
+    padding: 35px;
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
 .blogFooter {
-    margin-top: 35px;
-    display: flex;
-    justify-content: space-between;
-    color: var(--primary);
+    font-size: 13px;
     font-weight: 600;
+    color: var(--text-secondary);
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.blogFooter span {
+    color: #7C3AED;
+    font-weight: 700;
 }
 
 /* ===========================
@@ -215,45 +236,20 @@ const styles = `
 =========================== */
 .projectCard {
     background: var(--surface);
-    border-radius: var(--radius-lg);
+    border-radius: 24px;
     overflow: hidden;
     border: 1px solid var(--border);
-    transition: var(--transition-smooth);
+    box-shadow: var(--shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
-}
-
-.projectCard:hover {
-    transform: translateY(-8px) scale(1.01);
-    box-shadow: var(--shadow-premium);
-    border-color: var(--primary);
-}
-
-.projectBanner {
-    height: 200px;
-    background: var(--gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.projectBannerContent {
-    text-align: center;
-    color: white;
-}
-
-.projectBannerContent span {
-    letter-spacing: 2px;
-    font-size: 13px;
-}
-
-.projectBannerContent h4 {
-    margin-top: 10px;
-    font-size: 30px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
 }
 
 .projectContent {
-    padding: 30px;
+    padding: 35px;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -262,22 +258,18 @@ const styles = `
 .techList {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 25px;
+    gap: 8px;
+    margin-top: 20px;
 }
 
 .techList span {
-    padding: 8px 14px;
-    border-radius: 40px;
-    background: #F3E8FF;
-    color: var(--primary);
-    font-size: 13px;
-}
-
-.projectFooter {
-    margin-top: 30px;
-    color: var(--primary);
-    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(236, 72, 153, 0.1));
+    color: #7C3AED;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 /* ===========================
@@ -285,37 +277,34 @@ const styles = `
 =========================== */
 .roadmapGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 30px;
 }
 
 .roadmapCard {
     background: var(--surface);
-    border-radius: var(--radius-lg);
+    border-radius: 24px;
     padding: 35px;
     border: 1px solid var(--border);
-    transition: var(--transition-smooth);
+    box-shadow: var(--shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
     text-decoration: none;
     color: inherit;
-}
-
-.roadmapCard:hover {
-    transform: translateY(-8px) scale(1.01);
-    box-shadow: var(--shadow-premium);
-    border-color: var(--primary);
+    position: relative;
 }
 
 .roadmapHead {
     display: flex;
     gap: 20px;
+    align-items: flex-start;
 }
 
 .roadmapIndex {
-    width: 60px;
-    height: 60px;
-    background: var(--gradient);
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, #7C3AED, #EC4899);
     color: #fff;
     display: flex;
     align-items: center;
@@ -328,18 +317,20 @@ const styles = `
 .roadmapHead h3 {
     font-size: 20px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    color: var(--text);
 }
 
 .roadmapHead p {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 .roadmapLine {
     height: 1px;
     background: var(--border);
-    margin: 30px 0;
+    margin: 25px 0;
 }
 
 .roadmapCard ul {
@@ -350,86 +341,112 @@ const styles = `
 }
 
 .roadmapCard li {
-    margin-bottom: 14px;
-    color: var(--text-muted);
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    position: relative;
+    padding-left: 12px;
 }
 
-.roadmapFooter {
-    margin-top: 30px;
-    color: var(--primary);
-    font-weight: 700;
+.roadmapCard li::before {
+    content: '•';
+    color: #7C3AED;
+    position: absolute;
+    left: -12px;
+    font-weight: bold;
 }
 
 /* ===========================
    CTA SECTION
 =========================== */
 .cta {
-    padding: 60px 0;
+    padding: 40px 0;
+    background: var(--bg);
 }
 
 .ctaBox {
-    background: var(--gradient);
-    border-radius: 30px;
-    padding: 80px;
+    background: linear-gradient(135deg, #7C3AED, #EC4899);
+    border-radius: 24px;
+    padding: 45px 30px;
     color: white;
     text-align: center;
+    box-shadow: 0 25px 50px rgba(124, 58, 237, 0.25);
 }
 
 .ctaBox h2 {
-    font-size: 3rem;
-    margin: 25px 0;
+    font-size: 2.2rem;
+    margin: 15px 0;
     color: white;
+    font-family: 'Poppins', sans-serif;
 }
 
 .ctaBox p {
-    max-width: 650px;
+    max-width: 550px;
     margin: auto;
     color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 .ctaButtons {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-top: 40px;
+    gap: 15px;
+    margin-top: 25px;
 }
 
 /* ===========================
    NEWSLETTER SECTION
 =========================== */
 .newsletter {
-    padding-bottom: 60px;
+    padding-bottom: 80px;
+    background: var(--bg);
 }
 
 .newsletterBox {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 50px;
+    gap: 40px;
+    box-shadow: var(--shadow);
 }
 
 .newsletterBox h2 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+}
+
+.newsletterBox p {
+    color: var(--text-secondary);
+    line-height: 1.6;
 }
 
 .newsletterForm {
     display: flex;
-    gap: 15px;
+    gap: 12px;
 }
 
 .newsletterForm input {
-    width: 360px;
-    padding: 16px;
+    width: 320px;
+    padding: 15px 20px;
     border-radius: 14px;
     border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
     outline: none;
-    transition: var(--transition-smooth);
+    font-size: 15px;
+    transition: all 0.3s ease;
 }
 
 .newsletterForm input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 /* ===========================
@@ -441,6 +458,7 @@ const styles = `
     }
     .newsletterBox {
         flex-direction: column;
+        padding: 30px;
     }
     .newsletterForm {
         width: 100%;
@@ -450,7 +468,7 @@ const styles = `
         width: 100%;
     }
     .ctaBox {
-        padding: 50px 30px;
+        padding: 40px 20px;
     }
     .ctaButtons {
         flex-direction: column;
@@ -465,7 +483,6 @@ export default function HomePage() {
   const [roadmapList, setRoadmapList] = useState(roadmaps);
   const [resourceList, setResourceList] = useState(resources);
 
-  // New states for the newsletter subscription
   const [email, setEmail] = useState('');
   const [subscribeStatus, setSubscribeStatus] = useState('');
 
@@ -479,21 +496,17 @@ export default function HomePage() {
     fetchResources().then(setResourceList).catch(() => {});
   }, []);
 
-  // Handle newsletter subscription
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubscribeStatus(''); // Clear previous messages
+    setSubscribeStatus('');
 
-    // 1. Basic Regex Validation for Email Format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setSubscribeStatus('❌ Please enter a valid email address.');
       return;
     }
 
-    // 2. Send to your Next.js API Route
     try {
-      // Changed this line to point directly to your new Next.js route!
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -502,13 +515,28 @@ export default function HomePage() {
 
       if (res.ok) {
         setSubscribeStatus('Successfully subscribed!');
-        setEmail(''); // Clear the input field
+        setEmail('');
       } else {
-        setSubscribeStatus('This Email is Already Regsitered!!');
+        setSubscribeStatus('This Email is Already Registered!!');
       }
     } catch (error) {
       setSubscribeStatus('An error occurred. Try Again Later ');
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const parsedDate = new Date(dateString);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+      }
+    } catch (e) {}
+    return dateString;
   };
 
   return (
@@ -528,7 +556,7 @@ export default function HomePage() {
                 <br />
                 Confidence
               </h2>
-              <p>
+              <p style={{ color: 'var(--text-secondary)' }}>
                 High-quality content designed to help students
                 understand concepts quickly and build real skills.
               </p>
@@ -617,8 +645,8 @@ export default function HomePage() {
                             width: 48,
                             height: 48,
                             borderRadius: 12,
-                            background:
-                              "linear-gradient(135deg,#f3e8ff,#fce7f3)",
+                            background: "linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(236, 72, 153, 0.1))",
+                            border: "1px solid rgba(124, 58, 237, 0.2)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -652,7 +680,7 @@ export default function HomePage() {
                       <p>{sheet.description}</p>
 
                       <div className="cardBottom">
-                        <span>Read Guide</span>
+                        <span>Read Guide →</span>
                       </div>
                     </Link>
                   );
@@ -675,23 +703,20 @@ export default function HomePage() {
             />
 
             <div className="contentGrid">
-              {blogPosts.map((blog) => (
+              {blogPosts.slice(0, 6).map((blog) => (
                 <Link
                   key={blog.slug}
                   href={`/blog/${blog.slug}`}
                   className="blogCard"
                 >
-                  <div className="blogCover">
-                    <div className="blogOverlay">
-                      <span>TechWithTanziya</span>
-                    </div>
-                  </div>
                   <div className="blogContent">
-                    <span className="cardCategory">{blog.category}</span>
+                    <span className="cardCategory" style={{ marginBottom: '18px', width: 'fit-content' }}>
+                      {blog.category}
+                    </span>
                     <h3>{blog.title}</h3>
                     <p>{blog.description}</p>
                     <div className="blogFooter">
-                      <small>{blog.date}</small>
+                      <span>{formatDate(blog.date)}</span>
                       <span>Read Article →</span>
                     </div>
                   </div>
@@ -715,23 +740,24 @@ export default function HomePage() {
             />
 
             <div className="contentGrid">
-              {projectList.map((project) => (
+              {projectList.slice(0, 6).map((project) => (
                 <Link
                   key={project.slug}
                   href={`/projects/${project.slug}`}
                   className="projectCard"
                 >
-                  <div className="projectBanner">
-                    <div className="projectBannerContent">
-                      <span>PROJECT</span>
-                      <h4>{project.title}</h4>
-                    </div>
-                  </div>
                   <div className="projectContent">
+                    <div className="cardTop">
+                      {project.tech && project.tech[0] && (
+                        <span className="cardCategory">
+                          {project.tech[0]}
+                        </span>
+                      )}
+                    </div>
                     <h3>{project.title}</h3>
                     <p>{project.description}</p>
                     <div className="techList">
-                      {project.tech.map((tech) => (
+                      {project.tech.map((tech: string) => (
                         <span key={tech}>{tech}</span>
                       ))}
                     </div>
@@ -776,7 +802,7 @@ export default function HomePage() {
                   </div>
                   <div className="roadmapLine"></div>
                   <ul>
-                    {roadmap.steps.slice(0, 5).map((step) => (
+                    {roadmap.steps.slice(0, 5).map((step: string) => (
                       <li key={step}>{step}</li>
                     ))}
                   </ul>
@@ -801,15 +827,15 @@ export default function HomePage() {
             />
 
             <div className="contentGrid">
-              {resourceList.map((resource) => (
-                <article key={resource.slug} className="contentCard">
+              {resourceList.slice(0, 6).map((resource) => (
+                <Link key={resource.slug} href={`/resources/${resource.slug}`} className="contentCard">
                   <div className="cardTop">
                     <span className="cardCategory">{resource.tag}</span>
                   </div>
                   <h3>{resource.title}</h3>
                   <p>{resource.description}</p>
-                  <div className="cardBottom">Download →</div>
-                </article>
+                  <div className="cardBottom">View Resource →</div>
+                </Link>
               ))}
             </div>
           </div>
@@ -819,22 +845,20 @@ export default function HomePage() {
         <section className="cta">
           <div className="container">
             <div className="ctaBox">
-              <span className="sectionTag">START LEARNING TODAY</span>
+              <span className="sectionTag" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.4)' }}>
+                START LEARNING TODAY
+              </span>
               <h2>
-                Build Your Skills
-                <br />
-                One Step At A Time
+                Build Your Skills One Step At A Time
               </h2>
               <p>
-                Explore structured tutorials, projects,
-                blogs and cheat sheets designed for
-                aspiring developers.
+                Explore structured tutorials, projects, blogs and cheat sheets designed for aspiring developers.
               </p>
               <div className="ctaButtons">
-                <Link href="/cheatsheets" className="button button-primary">
+                <Link href="/cheatsheets" className="button" style={{ background: 'white', color: '#7C3AED', fontWeight: '700' }}>
                   Start Learning
                 </Link>
-                <Link href="/projects" className="button button-secondary">
+                <Link href="/projects" className="button" style={{ background: 'rgba(255, 255, 255, 0.15)', color: 'white', border: '2px solid white', fontWeight: '700' }}>
                   Explore Projects
                 </Link>
               </div>
@@ -844,34 +868,36 @@ export default function HomePage() {
 
         {/* ================================= NEWSLETTER ================================= */}
         <section className="newsletter">
-          <div className="container newsletterBox">
-            <div>
-              <h2>Stay Updated</h2>
-              <p>
-                Get notified whenever new blogs,
-                projects, cheat sheets and resources
-                are published.
-              </p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <form className="newsletterForm" onSubmit={handleSubscribe}>
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <button type="submit" className="button button-primary">
-                  Subscribe
-                </button>
-              </form>
-              {/* Conditional rendering for success or error messages */}
-              {subscribeStatus && (
-                <p style={{ fontSize: '14px', fontWeight: '600', color: subscribeStatus.includes('✅') ? '#25D366' : '#EF4444' }}>
-                  {subscribeStatus}
+          <div className="container">
+            <div className="newsletterBox">
+              <div>
+                <h2>Stay Updated</h2>
+                <p>
+                  Get notified whenever new blogs,
+                  projects, cheat sheets and resources
+                  are published.
                 </p>
-              )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <form className="newsletterForm" onSubmit={handleSubscribe}>
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    suppressHydrationWarning
+                    required
+                  />
+                  <button type="submit" className="button button-primary">
+                    Subscribe
+                  </button>
+                </form>
+                {subscribeStatus && (
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: subscribeStatus.includes('Successfully') ? '#25D366' : '#EF4444' }}>
+                    {subscribeStatus}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </section>

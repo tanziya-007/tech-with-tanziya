@@ -1,12 +1,23 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AdminProvider } from '@/context/AdminContext';
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://techwithtanziya.com'),
   title: 'TechWithTanziya | Learn • Code • Grow',
-  description: 'TechWithTanziya is a content-first learning platform for cheat sheets, blogs, projects, and roadmaps.',
-  keywords: ['learn', 'programming', 'cheat sheets', 'blog', 'Java', 'Python', 'web development', 'TechWithTanziya'],
+  description:
+    'TechWithTanziya is a content-first learning platform for cheat sheets, blogs, projects, and roadmaps.',
+  keywords: [
+    'learn',
+    'programming',
+    'cheat sheets',
+    'blog',
+    'Java',
+    'Python',
+    'web development',
+    'TechWithTanziya',
+  ],
   openGraph: {
     title: 'TechWithTanziya',
     description: 'Learn • Code • Grow',
@@ -25,14 +36,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body>
-        <AdminProvider>
-          {children}
-        </AdminProvider>
-      </body>
-    </html>
+   <html lang="en" data-scroll-behavior="smooth">
+  <body>
+    <ThemeProvider>
+      <AdminProvider>
+        {children}
+      </AdminProvider>
+    </ThemeProvider>
+  </body>
+</html>
   );
 }

@@ -8,24 +8,43 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { fetchRoadmaps } from "@/lib/api";
 
 const styles = `
-.roadmaps-page { padding: 90px 0; position: relative; overflow: hidden; }
-.roadmaps-page::before { content: ''; position: absolute; top: -30%; left: -8%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
-.roadmaps-page::after { content: ''; position: absolute; bottom: -25%; right: -5%; width: 350px; height: 350px; background: radial-gradient(circle, rgba(236,72,153,0.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+@keyframes slideInUp { 
+  from { opacity: 0; transform: translateY(30px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+
+.roadmaps-page { 
+  padding: 90px 0; 
+  position: relative; 
+  overflow: hidden; 
+  background: var(--bg);
+  min-height: 100vh;
+  transition: background 0.5s ease;
+}
+
+.roadmaps-page::before { content: ''; position: absolute; top: -30%; left: -8%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+.roadmaps-page::after { content: ''; position: absolute; bottom: -25%; right: -5%; width: 350px; height: 350px; background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
 
 .roadmap-grid { display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); position: relative; z-index: 1; }
 
-.roadmap-card { display: flex; flex-direction: column; background: white; border-radius: 20px; overflow: hidden; border: 1px solid #E5E7EB; transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-decoration: none; color: inherit; }
-.roadmap-card::before { content: ''; display: block; height: 4px; background: linear-gradient(90deg, #7C3AED, #EC4899); }
-.roadmap-card:hover { transform: translateY(-12px); box-shadow: 0 25px 50px rgba(124,58,237,0.15); }
+.roadmap-card { display: flex; flex-direction: column; background: var(--surface); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: var(--shadow); text-decoration: none; color: inherit; animation: slideInUp 0.6s ease-out backwards; }
 
-.roadmap-image { width: 100%; height: 200px; object-fit: cover; display: block; background: #f3f4f6; }
-.roadmap-image-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, #f3e8ff, #fce7f3); display: flex; align-items: center; justify-content: center; font-size: 56px; }
+.roadmap-card:nth-child(2) { animation-delay: 0.1s; }
+.roadmap-card:nth-child(3) { animation-delay: 0.2s; }
+.roadmap-card:nth-child(4) { animation-delay: 0.3s; }
+
+.roadmap-card::before { content: ''; display: block; height: 4px; background: var(--gradient); }
+.roadmap-card:hover { transform: translateY(-12px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
+
+.roadmap-image { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--surface-alt); }
+.roadmap-image-placeholder { width: 100%; height: 200px; background: var(--tag-bg); display: flex; align-items: center; justify-content: center; font-size: 56px; border-bottom: 1px solid var(--border); }
 
 .roadmap-body { padding: 28px; display: flex; flex-direction: column; flex: 1; }
-.roadmap-number { font-size: 13px; font-weight: 700; color: #7C3AED; letter-spacing: 1px; margin-bottom: 10px; }
-.roadmap-body h2 { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 10px; }
-.roadmap-body p { color: #6B7280; line-height: 1.7; font-size: 14px; flex: 1; }
-.roadmap-footer { margin-top: 20px; color: #7C3AED; font-weight: 700; font-size: 14px; }
+.roadmap-number { font-size: 13px; font-weight: 700; color: var(--primary); letter-spacing: 1px; margin-bottom: 10px; }
+.roadmap-body h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 10px; transition: color 0.3s ease; }
+.roadmap-body p { color: var(--text-secondary); line-height: 1.7; font-size: 14px; flex: 1; transition: color 0.3s ease; }
+.roadmap-footer { margin-top: 20px; color: var(--primary); font-weight: 700; font-size: 14px; transition: color 0.3s ease; }
+.roadmap-card:hover .roadmap-footer { color: var(--secondary); }
 
 @media (max-width: 600px) {
   .roadmaps-page { padding: 60px 0; }
@@ -55,9 +74,9 @@ export default function RoadmapsPage() {
               title="Learning Roadmaps"
               description="Structured learning paths to help you master programming step by step."
             />
-            {loading && <p style={{ textAlign: 'center', color: '#9CA3AF' }}>Loading...</p>}
+            {loading && <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Loading...</p>}
             {!loading && roadmaps.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#9CA3AF' }}>No roadmaps added yet.</p>
+              <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No roadmaps added yet.</p>
             )}
             <div className="roadmap-grid">
               {roadmaps.map((roadmap, index) => (

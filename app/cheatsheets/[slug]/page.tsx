@@ -21,17 +21,20 @@ const styles = `
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.9);
+  /* Adaptive glass effect */
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.5s ease, border-color 0.5s ease;
 }
 
 .page-wrapper {
-  background: linear-gradient(180deg, #fdfcff 0%, #f3f0fa 100%);
+  background: var(--bg);
   min-height: 100vh;
   /* Reduced padding: 90px clears the fixed navbar and leaves a much smaller, tighter margin */
   padding: 90px 0 100px;
+  transition: background 0.5s ease;
 }
 
 .cheatsheet-container {
@@ -52,45 +55,49 @@ const styles = `
 .badge {
   display: inline-block;
   padding: 8px 20px;
-  background: linear-gradient(135deg, #F3E8FF, #FCE7F3);
-  color: #7C3AED;
+  background: var(--tag-bg);
+  color: var(--tag-text);
   border-radius: 50px;
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 16px;
-  border: 1px solid #E9D5FF;
+  border: 1px solid var(--border);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  transition: all 0.3s ease;
 }
 
 .cheatsheet-header h1 {
   font-size: 3.5rem;
   font-weight: 800;
   margin: 0 0 16px;
-  font-family: Poppins, sans-serif;
+  font-family: 'Poppins', sans-serif;
   letter-spacing: -0.03em;
-  color: #111827;
+  color: var(--text);
   line-height: 1.2;
+  transition: color 0.3s ease;
 }
 
 .cheatsheet-header p {
-  color: #6B7280;
+  color: var(--text-secondary);
   font-size: 1.15rem;
   line-height: 1.6;
   max-width: 600px;
   margin: 0 auto;
+  transition: color 0.3s ease;
 }
 
 /* --- Document Viewer & Controls --- */
 .viewer-bezel {
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 32px;
   padding: 12px;
-  box-shadow: 0 25px 50px rgba(124, 58, 237, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   margin-bottom: 30px;
+  transition: all 0.3s ease;
 }
 
 .page-controls-wrapper {
@@ -106,10 +113,10 @@ const styles = `
 .page-tabs {
   display: flex;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--surface-alt);
   padding: 6px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
 }
@@ -123,7 +130,7 @@ const styles = `
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--text-secondary);
   border: none;
   background: transparent;
   cursor: pointer;
@@ -135,13 +142,13 @@ const styles = `
 }
 
 .page-tab:hover {
-  color: #7C3AED;
+  color: var(--primary);
 }
 
 .page-tab.active {
-  background: white;
-  color: #7C3AED;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .page-nav-arrows {
@@ -153,9 +160,9 @@ const styles = `
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  border: 1px solid #E5E7EB;
-  background: white;
-  color: #4B5563;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,9 +171,9 @@ const styles = `
 }
 
 .arrow-btn:hover {
-  border-color: #7C3AED;
-  color: #7C3AED;
-  background: #F9FAFB;
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface-alt);
 }
 
 .arrow-btn:active {
@@ -176,13 +183,14 @@ const styles = `
 .image-section {
   border-radius: 20px;
   overflow: hidden;
-  background: #f9fafb;
+  background: var(--surface-alt);
   min-height: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 .image-section img {
   width: 100%;
@@ -193,7 +201,7 @@ const styles = `
 }
 
 .no-image {
-  color: #9CA3AF;
+  color: var(--text-secondary);
   text-align: center;
   padding: 60px 20px;
   font-size: 1.1rem;
@@ -213,29 +221,30 @@ const styles = `
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card:hover {
-  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.08);
+  box-shadow: var(--shadow-hover);
   transform: translateY(-6px);
-  border-color: white;
+  border-color: var(--primary);
 }
 
 .card h2 {
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 16px;
-  color: #111827;
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: color 0.3s ease;
 }
 
 .card h2::before {
@@ -243,15 +252,16 @@ const styles = `
   display: block;
   width: 8px;
   height: 24px;
-  background: linear-gradient(180deg, #7C3AED, #EC4899);
+  background: var(--gradient);
   border-radius: 4px;
 }
 
 .card p {
-  color: #6B7280;
+  color: var(--text-secondary);
   line-height: 1.7;
   margin: 0;
   font-size: 15px;
+  transition: color 0.3s ease;
 }
 
 .card ul {
@@ -263,17 +273,18 @@ const styles = `
 .card li {
   margin-bottom: 12px;
   line-height: 1.6;
-  color: #4B5563;
+  color: var(--text);
   padding-left: 24px;
   position: relative;
   font-size: 15px;
+  transition: color 0.3s ease;
 }
 
 .card li::before {
   content: '→';
   position: absolute;
   left: 0;
-  color: #7C3AED;
+  color: var(--primary);
   font-weight: bold;
 }
 
@@ -293,7 +304,7 @@ const styles = `
   padding: 16px 36px;
   border-radius: 16px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -302,28 +313,26 @@ const styles = `
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #7C3AED, #EC4899);
+  background: var(--gradient);
   color: white;
-  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
 }
 
 .btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-hover);
 }
 
 .btn-secondary {
-  background: white;
-  color: #111827;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--primary);
 }
 
 .btn-secondary:hover {
-  border-color: #7C3AED;
-  color: #7C3AED;
+  background: var(--surface-alt);
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 5px 15px rgba(168, 85, 247, 0.15);
 }
 
 .back-container {
@@ -335,14 +344,14 @@ const styles = `
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #6B7280;
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 600;
   transition: 0.3s;
 }
 
 .back-link:hover {
-  color: #7C3AED;
+  color: var(--primary);
   transform: translateX(-4px);
 }
 
@@ -536,16 +545,16 @@ export default function CheatSheetPage({ params: paramsPromise }: PageProps) {
                 <div className="image-section">
                   {previewUrl ? (
                      <img
-    src={previewUrl}
-    alt={`${sheet?.title} Preview`}
-    style={{
-      width: "100%",
-      height: "auto",
-      display: "block",
-      borderRadius: "12px",
-      objectFit: "contain"
-    }}
-  />
+                        src={previewUrl}
+                        alt={`${sheet?.title} Preview`}
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          display: "block",
+                          borderRadius: "12px",
+                          objectFit: "contain"
+                        }}
+                      />
                   ) : (
                     <div className="no-image">
                       <span style={{ fontSize: '32px' }}>📋</span>

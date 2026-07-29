@@ -12,64 +12,57 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 type PageProps = { params: Promise<{ slug: string }> };
 
 const styles = `
-.project-container { max-width: 1300px; margin: 0 auto; padding: 40px 0; }
+.project-container { max-width: 1300px; margin: 0 auto; padding: 40px 20px; }
 
-.project-header { margin-bottom: 36px; }
-.badge { display: inline-block; padding: 8px 16px; background: #EEF2FF; color: #6C3BFF; border-radius: 50px; font-size: 13px; font-weight: 700; margin-bottom: 16px; }
-.project-header h1 { font-size: 2.75rem; margin: 18px 0 12px; font-family: Poppins, sans-serif; color: #111827; }
-.project-header p { color: #6B7280; font-size: 1.05rem; line-height: 1.7; }
+/* --- Project Details --- */
+.project-header { margin-bottom: 36px; animation: fadeUp 0.6s ease-out; }
+.badge { display: inline-block; padding: 8px 16px; background: var(--tag-bg); color: var(--tag-text); border-radius: 50px; font-size: 13px; font-weight: 700; margin-bottom: 16px; border: 1px solid var(--border); }
+.project-header h1 { font-size: 2.75rem; margin: 18px 0 12px; font-family: 'Poppins', sans-serif; color: var(--text); }
+.project-header p { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.7; }
 
 .tech-stack { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 36px; }
-.tech-badge { background: linear-gradient(135deg, rgba(108,59,255,0.1), rgba(45,125,255,0.1)); color: #6C3BFF; padding: 10px 18px; border-radius: 12px; font-size: 14px; font-weight: 600; border: 1px solid rgba(108,59,255,0.2); }
+.tech-badge { background: var(--surface-alt); color: var(--primary); padding: 10px 18px; border-radius: 12px; font-size: 14px; font-weight: 600; border: 1px solid var(--border); transition: 0.3s; }
+.tech-badge:hover { border-color: var(--primary); background: var(--tag-bg); transform: translateY(-2px); }
 
 .screenshots-section { margin-bottom: 40px; }
-.screenshots-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 16px; }
-.screenshots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; }
-.screenshot-card { border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: 0.3s; cursor: pointer; }
-.screenshot-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(124,58,237,0.15); border-color: #7C3AED; }
-.screenshot-card img { width: 100%; height: 320px; object-fit: cover; display: block; }
+.screenshots-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+.screenshots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 24px; }
+.screenshot-card { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; background: var(--surface); }
+.screenshot-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
+.screenshot-card img { width: 100%; height: auto; min-height: 420px; max-height: 600px; object-fit: contain; display: block; background: var(--surface-alt); }
 
-.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 12px; object-fit: contain; }
-.lightbox-close { position: absolute; top: 20px; right: 28px; color: white; font-size: 36px; cursor: pointer; font-weight: 300; line-height: 1; }
+.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; animation: fadeIn 0.3s ease; }
+.lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 12px; object-fit: contain; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.lightbox-close { position: absolute; top: 20px; right: 28px; color: white; font-size: 40px; cursor: pointer; font-weight: 300; line-height: 1; transition: 0.3s; }
+.lightbox-close:hover { color: var(--secondary); transform: scale(1.1); }
 
-.no-screenshots { background: #f9fafb; border-radius: 16px; padding: 40px; text-align: center; color: #9CA3AF; border: 1px solid #e5e7eb; }
+.no-screenshots { background: var(--surface-alt); border-radius: 16px; padding: 40px; text-align: center; color: var(--text-secondary); border: 1px solid var(--border); }
 
+/* --- Action Buttons --- */
 .action-buttons { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 40px; }
-.button { padding: 14px 32px; border-radius: 12px; font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; border: none; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
-.button-primary { background: linear-gradient(135deg, #6C3BFF, #2D7DFF); color: white; box-shadow: 0 4px 15px rgba(108,59,255,0.3); }
-.button-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(108,59,255,0.4); }
-.button-secondary { border: 2px solid #6C3BFF; background: white; color: #6C3BFF; font-weight: 700; }
-.button-secondary:hover { background: #f5f3ff; }
+.button { padding: 14px 32px; border-radius: 12px; font-weight: 600; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; border: none; cursor: pointer; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.button-primary { background: var(--gradient); color: white; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); }
+.button-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: var(--shadow-hover); }
+.button-secondary { border: 2px solid var(--primary); background: transparent; color: var(--text); font-weight: 700; }
+.button-secondary:hover { background: var(--surface-alt); box-shadow: 0 5px 15px rgba(168, 85, 247, 0.15); }
 
-/* Enhanced Premium WhatsApp Button Styles */
-.button-whatsapp { 
-  background: linear-gradient(135deg, #25D366, #128C7E); 
-  color: white; 
-  box-shadow: 0 4px 15px rgba(37,211,102,0.35); 
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.button-whatsapp:hover { 
-  transform: translateY(-3px) scale(1.02); 
-  box-shadow: 0 10px 25px rgba(37,211,102,0.5); 
-  background: linear-gradient(135deg, #22c55e, #0f766e); 
-}
-.button-whatsapp svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-  transition: transform 0.3s ease;
-}
-.button-whatsapp:hover svg {
-  transform: scale(1.1) rotate(-5deg);
-}
+/* Premium WhatsApp Button */
+.button-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); color: white; box-shadow: 0 4px 15px rgba(37,211,102,0.35); border: 1px solid rgba(255,255,255,0.1); }
+.button-whatsapp:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 25px rgba(37,211,102,0.5); background: linear-gradient(135deg, #22c55e, #0f766e); }
+.button-whatsapp svg { width: 20px; height: 20px; fill: currentColor; transition: transform 0.3s ease; }
+.button-whatsapp:hover svg { transform: scale(1.1) rotate(-5deg); }
 
 .back-link { margin-top: 50px; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
 @media(max-width: 900px) {
   .project-header h1 { font-size: 2rem; }
   .action-buttons { flex-direction: column; }
   .button { width: 100%; justify-content: center; }
+  .screenshots-grid { grid-template-columns: 1fr; }
 }
 `;
 
@@ -113,12 +106,13 @@ export default function ProjectDetailPage({ params: paramsPromise }: PageProps) 
         <Navigation />
         <section>
           <div className="container project-container">
-            {loading && <p style={{ color: '#9CA3AF', textAlign: 'center', padding: '80px 0' }}>Loading...</p>}
+
+            {loading && <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '80px 0' }}>Loading project details...</p>}
 
             {!loading && project && (
               <>
                 <div className="project-header">
-                  <p className="badge">Project</p>
+                  <p className="badge">Project Details</p>
                   <h1>{project.title}</h1>
                   {project.description && <p>{project.description}</p>}
                 </div>

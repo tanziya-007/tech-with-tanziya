@@ -3,9 +3,11 @@ import Link from "next/link";
 const styles = `
 .hero {
   padding: 120px 0;
-  background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 50%, #f0f9ff 100%);
+  /* Updated to use theme variables for a smooth transition */
+  background: linear-gradient(135deg, var(--bg) 0%, var(--surface-alt) 100%);
   position: relative;
   overflow: hidden;
+  transition: background 0.5s ease;
 }
 
 .hero::before {
@@ -15,7 +17,8 @@ const styles = `
   right: -10%;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  /* Glow effects adapt slightly but remain vibrant */
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
   border-radius: 50%;
   z-index: 0;
 }
@@ -60,14 +63,16 @@ const styles = `
 .hero-badge {
   display: inline-block;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #F3E8FF, #FCE7F3);
-  color: #7C3AED;
+  /* Uses the dynamic tag variables from globals.css */
+  background: var(--tag-bg);
+  color: var(--tag-text);
   border-radius: 50px;
   font-weight: 700;
   font-size: 14px;
   margin-bottom: 30px;
-  border: 1px solid #E9D5FF;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.1);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
 }
 
 .hero-left h1 {
@@ -75,16 +80,20 @@ const styles = `
   font-family: Poppins, sans-serif;
   line-height: 1.2;
   margin: 25px 0;
-  color: #111827;
+  /* Dynamic text color */
+  color: var(--text);
   font-weight: 800;
+  transition: color 0.5s ease;
 }
 
 .hero-left p {
   font-size: 1.1rem;
-  color: #666;
+  /* Dynamic secondary text color */
+  color: var(--text-secondary);
   line-height: 1.8;
   margin-bottom: 40px;
   max-width: 100%;
+  transition: color 0.5s ease;
 }
 
 .hero-buttons {
@@ -98,7 +107,7 @@ const styles = `
   padding: 14px 32px;
   border-radius: 12px;
   font-weight: 600;
-  transition: 0.3s;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -109,28 +118,28 @@ const styles = `
 }
 
 .button:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) scale(1.02);
 }
 
 .button-primary {
-  background: linear-gradient(135deg, #7C3AED, #EC4899);
+  background: var(--gradient);
   color: white;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);
 }
 
 .button-primary:hover {
-  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
+  box-shadow: var(--shadow-hover);
 }
 
 .button-secondary {
-  border: 2px solid #7C3AED;
-  background: white;
-  color: #7C3AED;
-  font-weight: 700;
+  border: 2px solid var(--primary);
+  background: transparent;
+  color: var(--text);
 }
 
 .button-secondary:hover {
-  background: #F3E8FF;
+  background: var(--surface-alt);
+  box-shadow: 0 5px 15px rgba(168, 85, 247, 0.15);
 }
 
 .hero-tech {
@@ -142,21 +151,22 @@ const styles = `
 
 .hero-tech span {
   padding: 8px 14px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  /* Adapts to light/dark mode surfaces */
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
   font-size: 13px;
   font-weight: 600;
-  color: #555;
-  transition: 0.3s;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .hero-tech span:hover {
-  border-color: #7C3AED;
-  color: #7C3AED;
-  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.15);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: var(--shadow-hover);
   transform: translateY(-3px);
 }
 
@@ -183,17 +193,19 @@ const styles = `
 .editor {
   width: 100%;
   max-width: 650px;
-  background: #0f172a;
+  /* Kept permanently dark to mimic a real terminal window */
+  background: #0a0512;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  transition: 0.3s;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .editor:hover {
-  box-shadow: 0 50px 100px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 30px 60px rgba(147, 51, 234, 0.15);
   transform: translateY(-5px);
+  border-color: var(--primary);
 }
 
 .editor-top {
@@ -202,8 +214,8 @@ const styles = `
   align-items: center;
   gap: 10px;
   padding: 0 20px;
-  background: #1e293b;
-  border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+  background: #130a20;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
 }
 
 .editor-dot {
@@ -233,11 +245,11 @@ const styles = `
 }
 
 .editor pre::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #0a0512;
 }
 
 .editor pre::-webkit-scrollbar-thumb {
-  background: #7C3AED;
+  background: var(--primary);
   border-radius: 4px;
 }
 

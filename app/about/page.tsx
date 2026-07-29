@@ -285,7 +285,7 @@ export default function AboutPage() {
         <section className="about-hero">
           <div className="container about-container">
             <div className="about-image">
-              <Image src="/logo.png" alt="TechWithTanziya" width={320} height={320} />
+              <Image src="/logo1.png" alt="TechWithTanziya" width={320} height={320} />
             </div>
 
             <div className="about-content">
