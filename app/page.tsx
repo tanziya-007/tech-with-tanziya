@@ -540,45 +540,90 @@ export default function HomePage() {
 
         {/* ================================= CHEAT SHEETS ================================= */}
         <section className="contentSection">
-          <div className="container">
-            <SectionHeading
-              title="Latest Cheat Sheets"
-              description="Quick references for faster learning."
-              action={
-                <Link href="/cheatsheets" className="button button-secondary">
-                  View All
-                </Link>
-              }
-            />
+  <div className="container">
+    <SectionHeading
+      title="Latest Cheat Sheets"
+      description="Quick references for faster learning."
+      action={
+        <Link href="/cheatsheets" className="button button-secondary">
+          View All
+        </Link>
+      }
+    />
 
-            <div className="contentGrid">
-              {sheets.slice(0, 6).map((sheet) => {
-                const logo = getTechLogo(sheet.title) || getTechLogo(sheet.slug);
-                return (
-                  <Link
-                    key={sheet.slug}
-                    href={`/cheatsheets/${sheet.slug}`}
-                    className="contentCard"
-                  >
-                    <div className="cardTop" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                      <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg,#f3e8ff,#fce7f3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, flexShrink: 0 }}>
-                        {logo
-                          ? <img src={logo} alt={sheet.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          : <span style={{ fontSize: 24 }}>📘</span>}
-                      </div>
-                      {sheet.category && <span className="cardCategory">{sheet.category}</span>}
-                    </div>
-                    <h3>{sheet.title}</h3>
-                    <p>{sheet.description}</p>
-                    <div className="cardBottom">
-                      <span>Read Guide</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+    <div className="contentGrid">
+      {[...sheets]
+        .sort((a, b) => {
+          const aNum = parseInt(a.title.match(/^\d+/)?.[0] || "0", 10);
+          const bNum = parseInt(b.title.match(/^\d+/)?.[0] || "0", 10);
+          return aNum - bNum;
+        })
+        .slice(0, 6)
+        .map((sheet) => {
+          const logo = getTechLogo(sheet.title) || getTechLogo(sheet.slug);
+
+          return (
+            <Link
+              key={sheet.slug}
+              href={`/cheatsheets/${sheet.slug}`}
+              className="contentCard"
+            >
+              <div
+                className="cardTop"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    background:
+                      "linear-gradient(135deg,#f3e8ff,#fce7f3)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 10,
+                    flexShrink: 0,
+                  }}
+                >
+                  {logo ? (
+                    <img
+                      src={logo}
+                      alt={sheet.title}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: 24 }}>📘</span>
+                  )}
+                </div>
+
+                {sheet.category && (
+                  <span className="cardCategory">
+                    {sheet.category}
+                  </span>
+                )}
+              </div>
+
+              <h3>{sheet.title.replace(/^\d+\.\s*/, "")}</h3>
+              <p>{sheet.description}</p>
+
+              <div className="cardBottom">
+                <span>Read Guide</span>
+              </div>
+            </Link>
+          );
+        })}
+    </div>
+  </div>
+</section>
 
         {/* ================================= BLOGS ================================= */}
         <section className="contentSection alternate">
