@@ -501,13 +501,13 @@ export default function HomePage() {
       });
 
       if (res.ok) {
-        setSubscribeStatus('✅ Successfully subscribed!');
+        setSubscribeStatus('Successfully subscribed!');
         setEmail(''); // Clear the input field
       } else {
-        setSubscribeStatus('❌ Failed to subscribe. Please try again.');
+        setSubscribeStatus('This Email is Already Regsitered!!');
       }
     } catch (error) {
-      setSubscribeStatus('❌ An error occurred. Is the server running?');
+      setSubscribeStatus('An error occurred. Try Again Later ');
     }
   };
 
