@@ -136,6 +136,33 @@ export default function BlogDetailPage({ params: paramsPromise }: PageProps) {
       .finally(() => setLoading(false));
   }, [params.slug]);
 
+  // Handle the share action
+  const handleShare = async () => {
+    if (!blog) return;
+
+    const shareData = {
+      title: blog.title,
+      text: `Check out this article: ${blog.title}`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy link: ', err);
+      }
+    }
+  };
+
   if (!loading && notFoundState) notFound();
 
   return (
@@ -164,7 +191,9 @@ export default function BlogDetailPage({ params: paramsPromise }: PageProps) {
                 </div>
 
                 <div className="action-buttons">
-                  <button className="button button-secondary">📤 Share</button>
+                  <button onClick={handleShare} className="button button-secondary">
+                    📤 Share
+                  </button>
                 </div>
 
                 <div className="back-link">

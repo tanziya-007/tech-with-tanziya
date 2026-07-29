@@ -163,7 +163,7 @@ export default function ProjectDetailPage({ params: paramsPromise }: PageProps) 
                   
                   {/* Enhanced WhatsApp Integration */}
                   <a 
-                    href={`https://wa.me/919900378826?text=${encodeURIComponent(`Hi Vaibhav, I saw your project "${project.title}" and would like to connect!`)}`} 
+                    href={`https://wa.me/919900378826?text=${encodeURIComponent(`Hi TechWithTanziya, I saw your project "${project.title}" and would like to connect!`)}`} 
                     target="_blank" 
                     rel="noreferrer" 
                     className="button button-whatsapp"
