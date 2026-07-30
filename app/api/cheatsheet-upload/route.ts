@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer = new Uint8Array(bytes);
     
     const ext = file.name.split('.').pop();
     const filename = `${slug}.${ext}`;

@@ -26,7 +26,6 @@ const styles = `
 .custom-banner::before { content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
 .banner-content h3 { font-size: 24px; font-family: 'Poppins', sans-serif; margin-bottom: 8px; font-weight: 700; color: white; position: relative; z-index: 1; }
 .banner-content p { font-size: 15px; opacity: 0.9; margin: 0; color: white; max-width: 650px; line-height: 1.6; position: relative; z-index: 1; }
-/* Fixed button styles with explicit dark text for high contrast */
 
 .banner-btn { background: #ffffff; color: #9b2eaa; padding: 12px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: 0.3s; white-space: nowrap; box-shadow: 0 4px 15px rgba(0,0,0,0.15); position: relative; z-index: 1; display: inline-block; }
 .banner-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(0,0,0,0.25); background: #f3f4f6; color: #5b21b6; }
@@ -44,9 +43,9 @@ const styles = `
 .project-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 18px; transition: color 0.3s ease; }
 
 .tech-stack { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-.tech-stack span { background: var(--tag-bg); color: var(--tag-text); padding: 6px 12px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; }
-.project-card:hover .tech-stack span { border-color: var(--primary); }
-.tech-stack span img { width: 18px; height: 18px; object-fit: contain; }
+.tech-stack .tech-badge { background: var(--tag-bg); color: var(--tag-text); padding: 6px 12px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease; }
+.tech-stack .tech-badge img { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+.project-card:hover .tech-stack .tech-badge { border-color: var(--primary); }
 
 .project-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
 .project-buttons .btn { padding: 12px 20px; border-radius: 10px; font-weight: 600; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; display: inline-flex; align-items: center; font-size: 0.95rem; border: none; cursor: pointer; }
@@ -157,8 +156,16 @@ export default function ProjectsPage() {
                     {(project.tech || []).map((t: string) => {
                       const logo = getTechLogo(t);
                       return (
-                        <span key={t}>
-                          {logo && <img src={logo} alt={t} />}
+                        <span key={t} className="tech-badge">
+                          {logo && (
+                            <img 
+                              src={logo} 
+                              alt={t} 
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          )}
                           {t}
                         </span>
                       );

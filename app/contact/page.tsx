@@ -25,7 +25,10 @@ const styles = `
 .info-items { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
 .info-item { display: flex; align-items: center; gap: 16px; color: var(--text); font-weight: 600; text-decoration: none; transition: 0.3s; }
 .info-item:hover { color: var(--primary); transform: translateX(4px); }
-.info-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--tag-bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; flex-shrink: 0; }
+.info-item.static { cursor: default; }
+.info-item.static:hover { color: var(--text); transform: none; }
+.info-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--tag-bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; flex-shrink: 0; overflow: hidden; }
+.info-icon img, .info-icon svg { width: 22px; height: 22px; object-fit: contain; display: block; }
 
 .whatsapp-direct-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; background: linear-gradient(135deg, #25D366, #128C7E); color: white; border-radius: 14px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 15px rgba(37,211,102,0.35); transition: 0.3s; }
 .whatsapp-direct-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(37,211,102,0.5); }
@@ -58,24 +61,25 @@ export default function ContactPage() {
     setLoading(true);
     setStatus('');
 
-    try {
-      // You can wire this endpoint up to your backend or email service route
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    const formPayload = new URLSearchParams();
+    formPayload.append('entry.691143515', formData.name);       // Name Field ID
+    formPayload.append('entry.989260168', formData.email);     // Email Field ID
+    formPayload.append('entry.1998289441', formData.message);  // Message Field ID
 
-      if (res.ok || res.status === 404) {
-        // Fallback gracefully if route isn't built yet, or show success
-        setStatus('✅ Thank you! Your message has been sent successfully.');
-        setFormData({ name: '', email: '', message: '' });
-      } else {
-        setStatus('❌ Something went wrong. Please try contacting via WhatsApp directly.');
-      }
-    } catch {
-      setStatus('✅ Message submitted successfully! We will get back to you soon.');
+    try {
+      await fetch(
+        'https://docs.google.com/forms/d/e/1FAIpQLSd2YFYP5dbskaVfF-pdUrJ-6FUQSd_MtcS8u6402Ku-sfTkSA/formResponse',
+        {
+          method: 'POST',
+          body: formPayload,
+          mode: 'no-cors',
+        }
+      );
+
+      setStatus('✅ Thank you! Your message has been sent successfully.');
       setFormData({ name: '', email: '', message: '' });
+    } catch (error) {
+      setStatus('❌ Something went wrong. Please try contacting via WhatsApp directly.');
     } finally {
       setLoading(false);
     }
@@ -97,7 +101,7 @@ export default function ContactPage() {
 
             <div className="contact-grid">
               
-              {/* Left Column: Direct Info & WhatsApp */}
+              {/* Left Column: Direct Info & Socials */}
               <div className="contact-info-card">
                 <div>
                   <h3>Contact Information</h3>
@@ -105,14 +109,49 @@ export default function ContactPage() {
                   
                   <div className="info-items">
                     <a href="mailto:contact@techwithtanziya.com" className="info-item">
-                      <div className="info-icon">✉️</div>
+                      <div className="info-icon">
+                        <img 
+                          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" 
+                          alt="Email" 
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                      </div>
                       <span>contact@techwithtanziya.com</span>
                     </a>
-                    <a href="https://github.com" target="_blank" rel="noreferrer" className="info-item">
-                      <div className="info-icon">💻</div>
+
+                    <div className="info-item static">
+                      <div className="info-icon">
+                        <img 
+                          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" 
+                          alt="GitHub" 
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                      </div>
                       <span>GitHub Community</span>
+                    </div>
+
+                    <a href="https://instagram.com/techwithtanziya" target="_blank" rel="noreferrer" className="info-item">
+                      <div className="info-icon">
+                        <img 
+                          src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" 
+                          alt="Instagram" 
+                        />
+                      </div>
+                      <span>@techwithtanziya</span>
                     </a>
-                    <div className="info-item" style={{ cursor: 'default' }}>
+
+                    <a href="https://linkedin.com/in/TechWithTanziya" target="_blank" rel="noreferrer" className="info-item">
+                      <div className="info-icon">
+                        <img 
+                          src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" 
+                          alt="LinkedIn" 
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                      </div>
+                      <span>TechWithTanziya</span>
+                    </a>
+
+                    <div className="info-item static">
                       <div className="info-icon">📍</div>
                       <span>India</span>
                     </div>

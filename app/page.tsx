@@ -502,7 +502,7 @@ export default function HomePage() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setSubscribeStatus('❌ Please enter a valid email address.');
+      setSubscribeStatus('Please enter a valid email address.');
       return;
     }
 
