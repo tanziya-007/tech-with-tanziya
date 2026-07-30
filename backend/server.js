@@ -368,6 +368,49 @@ app.get("/api/cheatsheets/:slug/drive", async (req, res) => {
   }
 });
 
+app.post('/api/cheatsheets', authMiddleware, async (req, res) => {
+  try {
+    const {
+      slug,
+      title,
+      description,
+      category,
+      googleDriveFolderId,
+      googleDriveId,
+    } = req.body;
+
+    if (!slug || !title) {
+      return res.status(400).json({
+        error: "Slug and title are required",
+      });
+    }
+
+    const cheatSheet = await CheatSheet.findOneAndUpdate(
+      { slug },
+      {
+        slug,
+        title,
+        description,
+        category,
+        googleDriveFolderId,
+        googleDriveId,
+        updatedAt: new Date(),
+      },
+      {
+        upsert: true,
+        new: true,
+      }
+    );
+
+    res.json(cheatSheet);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
 // ================================
 // Blogs
 // ================================

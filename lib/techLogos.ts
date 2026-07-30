@@ -73,7 +73,7 @@ const devIconMap: Record<string, string> = {
   figma: 'figma',
   redux: 'redux',
   graphql: 'graphql',
-  jwt: 'express', // Safe fallback or alternative mapping if jwt icon path drops
+  jwt: 'express',
   'json web token': 'express',
 };
 
@@ -93,7 +93,8 @@ export function getTechLogo(name: string): string | null {
 
   if (!icon) return null;
 
-  const plainOnly = ["github", "express", "nextjs", "bash", "jsonwebtokens"];
+  // 'express' uses 'original' variant because 'plain' does not exist in devicon for express
+  const plainOnly = ["github", "nextjs", "bash", "jsonwebtokens"];
   const variant = plainOnly.includes(icon) ? "plain" : "original";
 
   return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${icon}/${icon}-${variant}.svg`;

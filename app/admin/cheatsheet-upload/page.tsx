@@ -32,10 +32,11 @@ const styles = `
 
 /* Image Grid */
 .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
-.image-card { border: 2px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; background: var(--surface-alt); }
+.image-card { border: 2px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; background: var(--surface-alt); display: flex; flex-direction: column; }
 .image-card:hover { border-color: var(--primary-light); transform: translateY(-2px); }
 .image-card.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25); }
 .image-card img { width: 100%; height: 100px; object-fit: cover; display: block; border-bottom: 1px solid var(--border); }
+.image-fallback { width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(236, 72, 153, 0.1)); font-size: 28px; border-bottom: 1px solid var(--border); }
 .image-card p { font-size: 11px; padding: 6px 8px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
 
 /* Buttons */
@@ -81,6 +82,8 @@ export default function CheatSheetUploadPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [sheets, setSheets] = useState<CheatSheet[]>([]);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+  
   const router = useRouter();
   const { isAdmin, token, logout, mounted: adminMounted } = useAdmin();
 
@@ -118,9 +121,9 @@ export default function CheatSheetUploadPage() {
     setSelectedFolder(folderId);
     setImages([]);
     setSelectedImage(null);
+    setFailedImages({});
     if (!folderId) return;
 
-    // Auto-derive slug and title from the folder name
     const folder = folders.find(f => f.id === folderId);
     if (folder) {
       setSlug(folder.name.toLowerCase().replace(/\s+/g, '-'));
@@ -216,8 +219,20 @@ export default function CheatSheetUploadPage() {
                 ) : (
                   <div className="images-grid">
                     {images.map(img => (
-                      <div key={img.id} className={`image-card ${selectedImage?.id === img.id ? 'selected' : ''}`} onClick={() => setSelectedImage(img)}>
-                        <img src={img.thumbnailUrl} alt={img.name} />
+                      <div 
+                        key={img.id} 
+                        className={`image-card ${selectedImage?.id === img.id ? 'selected' : ''}`} 
+                        onClick={() => setSelectedImage(img)}
+                      >
+                        {failedImages[img.id] ? (
+                          <div className="image-fallback">📄</div>
+                        ) : (
+                          <img 
+                            src={img.thumbnailUrl} 
+                            alt={img.name} 
+                            onError={() => setFailedImages(prev => ({ ...prev, [img.id]: true }))}
+                          />
+                        )}
                         <p>{img.name}</p>
                       </div>
                     ))}
