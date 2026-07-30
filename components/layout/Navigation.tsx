@@ -376,9 +376,7 @@ export function Navigation() {
               )}
             </div>
             
-            <Link href="/cheatsheets" className="start-btn">
-              Start Learning
-            </Link>
+           
 
             {/* Mobile Hamburger Button */}
             <button 

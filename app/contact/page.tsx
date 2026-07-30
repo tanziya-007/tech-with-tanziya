@@ -108,7 +108,7 @@ export default function ContactPage() {
                   <p>Fill out the form or reach out directly through any of these channels. We are always happy to help students and developers!</p>
                   
                   <div className="info-items">
-                    <a href="mailto:contact@techwithtanziya.com" className="info-item">
+                    <a href="mailto:techwithtanziya@gmail.com" className="info-item">
                       <div className="info-icon">
                         <img 
                           src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" 
@@ -116,7 +116,7 @@ export default function ContactPage() {
                           onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                         />
                       </div>
-                      <span>contact@techwithtanziya.com</span>
+                      <span>techwithtanziya@gmail.com</span>
                     </a>
 
                     <div className="info-item static">
@@ -140,7 +140,7 @@ export default function ContactPage() {
                       <span>@techwithtanziya</span>
                     </a>
 
-                    <a href="https://linkedin.com/in/TechWithTanziya" target="_blank" rel="noreferrer" className="info-item">
+                    <a href="https://www.linkedin.com/company/techwithtanziya" target="_blank" rel="noreferrer" className="info-item">
                       <div className="info-icon">
                         <img 
                           src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" 

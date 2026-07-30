@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { FaLinkedin, FaInstagram, FaTwitter, FaFacebook, FaYoutube } from "react-icons/fa";
 
 const styles = `
 .footer {
@@ -81,7 +81,7 @@ const styles = `
 .social-links {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   margin-top: 8px;
 }
@@ -96,18 +96,13 @@ const styles = `
   background: rgba(255,255,255,0.08);
   color: #cbd5e1;
   transition: background 0.25s ease, transform 0.25s ease, color 0.25s ease;
+  margin-bottom: 0 !important;
 }
 
 .social-link:hover {
   background: rgba(108,59,255,0.18);
   color: #fff;
   transform: translateY(-2px);
-}
-
-.social-link svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
 }
 
 .sr-only {
@@ -201,30 +196,42 @@ export function Footer() {
           <div>
             <h3>Connect</h3>
             <div className="social-links">
+              {/* LinkedIn */}
               <a href="https://www.linkedin.com/company/techwithtanziya/" target="_blank" rel="noreferrer" className="social-link">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 5 3.87 6.15 2.39 6.15 0.9 6.15 0 5 0 3.5 0 2 0.9 0.85 2.39 0.85 3.87 0.85 4.98 2 4.98 3.5ZM0.47 8.48H3.75V24H0.47V8.48ZM8.79 8.48H12V10.35H12.06C12.65 9.42 14.07 8.4 15.92 8.4 20.16 8.4 20.86 11.1 20.86 15.21V24H17.59V15.96C17.59 13.68 17.54 10.95 14.78 10.95 12 10.95 11.6 13.38 11.6 15.81V24H8.33V8.48H8.79Z"/></svg>
+                <FaLinkedin size={20} />
                 <span className="sr-only">LinkedIn</span>
               </a>
-              <a
-  href="https://github.com/tanziya-007"
-  target="_blank"
-  rel="noreferrer"
-  className="social-link"
->
-  <FaGithub size={20} />
-  <span className="sr-only">GitHub</span>
-</a>
+
+              {/* Twitter / X */}
+              <a href="https://x.com/TechwithTanziya" target="_blank" rel="noreferrer" className="social-link">
+                <FaTwitter size={19} />
+                <span className="sr-only">Twitter</span>
+              </a>
+
+              {/* Instagram */}
               <a href="https://www.instagram.com/techwithtanziya?igsh=ZDRld2w3eTdiM2Nu" target="_blank" rel="noreferrer" className="social-link">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.19 0 3.58 0.01 4.84 0.07 1.17 0.05 1.8 0.24 2.22 0.41 0.55 0.23 0.94 0.51 1.35 0.92 0.41 0.41 0.69 0.8 0.92 1.35 0.17 0.42 0.36 1.05 0.41 2.22 0.06 1.26 0.07 1.65 0.07 4.84s-0.01 3.58-0.07 4.84c-0.05 1.17-0.24 1.8-0.41 2.22-0.23 0.55-0.51 0.94-0.92 1.35-0.41 0.41-0.8 0.69-1.35 0.92-0.42 0.17-1.05 0.36-2.22 0.41-1.26 0.06-1.65 0.07-4.84 0.07s-3.58-0.01-4.84-0.07c-1.17-0.05-1.8-0.24-2.22-0.41-0.55-0.23-0.94-0.51-1.35-0.92-0.41-0.41-0.69-0.8-0.92-1.35-0.17-0.42-0.36-1.05-0.41-2.22-0.06-1.26-0.07-1.65-0.07-4.84s0.01-3.58 0.07-4.84c0.05-1.17 0.24-1.8 0.41-2.22 0.23-0.55 0.51-0.94 0.92-1.35 0.41-0.41 0.8-0.69 1.35-0.92 0.42-0.17 1.05-0.36 2.22-0.41 1.26-0.06 1.65-0.07 4.84-0.07zm0-2.16C8.74 0 8.3 0.01 7.05 0.07 5.79 0.13 4.81 0.34 4.05 0.65 3.23 0.99 2.53 1.45 1.86 2.12 1.19 2.79 0.74 3.48 0.4 4.3 0.09 5.06-0.13 6.04-0.19 7.3-0.25 8.55-0.26 9 0 12s0.01 3.45 0.07 4.7c0.06 1.26 0.27 2.24 0.58 3 0.34 0.82 0.79 1.51 1.46 2.18 0.67 0.67 1.36 1.12 2.18 1.46 0.76 0.31 1.74 0.52 3 0.58 1.25 0.06 1.7 0.07 4.7 0.07s3.45-0.01 4.7-0.07c1.26-0.06 2.24-0.27 3-0.58 0.82-0.34 1.51-0.79 2.18-1.46 0.67-0.67 1.12-1.36 1.46-2.18 0.31-0.76 0.52-1.74 0.58-3 0.06-1.25 0.07-1.7 0.07-4.7s-0.01-3.45-0.07-4.7c-0.06-1.26-0.27-2.24-0.58-3-0.34-0.82-0.79-1.51-1.46-2.18C21.7 1.45 21.02 1 20.2 0.65 19.44 0.34 18.46 0.13 17.2 0.07 15.95 0.01 15.51 0 12 0z"/><path d="M12 5.84A6.16 6.16 0 1 0 18.16 12 6.17 6.17 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4zm6.4-11.65a1.44 1.44 0 1 1-1.44-1.44 1.44 1.44 0 0 1 1.44 1.44z"/></svg>
+                <FaInstagram size={20} />
                 <span className="sr-only">Instagram</span>
+              </a>
+
+              {/* Facebook */}
+              <a href="https://www.facebook.com/share/1BrSDyPULU/" target="_blank" rel="noreferrer" className="social-link">
+                <FaFacebook size={20} />
+                <span className="sr-only">Facebook</span>
+              </a>
+
+              {/* YouTube */}
+              <a href="https://www.youtube.com/@techwithtanziya" target="_blank" rel="noreferrer" className="social-link">
+                <FaYoutube size={20} />
+                <span className="sr-only">YouTube</span>
               </a>
             </div>
           </div>
 
         </div>
 
-        <div className="footer-bottom">
-          © {new Date().getFullYear()} Tech With Tanziya. All Rights Reserved.
+        <div className="footer-bottom" suppressHydrationWarning>
+          © 2026 Tech With Tanziya. All Rights Reserved.
         </div>
 
       </footer>
