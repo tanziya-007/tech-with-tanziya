@@ -79,7 +79,7 @@ export default function ContactPage() {
       setStatus('Thank you for your message! We will get back to you soon. ');
       setFormData({ name: '', email: '', message: '' });
     } catch (error) {
-      setStatus('❌ Something went wrong. Please try contacting via WhatsApp directly.');
+      setStatus('Something went wrong. Please try contacting via WhatsApp directly.');
     } finally {
       setLoading(false);
     }
