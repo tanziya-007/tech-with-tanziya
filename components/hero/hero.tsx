@@ -1,38 +1,38 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const styles = `
 .hero {
   padding: 120px 0;
-  /* Updated to use theme variables for a smooth transition */
   background: linear-gradient(135deg, var(--bg) 0%, var(--surface-alt) 100%);
   position: relative;
   overflow: hidden;
   transition: background 0.5s ease;
 }
 
-.hero::before {
+.hero::before, .hero::after {
   content: '';
   position: absolute;
-  top: -50%;
-  right: -10%;
-  width: 600px;
-  height: 600px;
-  /* Glow effects adapt slightly but remain vibrant */
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
   border-radius: 50%;
   z-index: 0;
 }
 
+.hero::before {
+  top: -50%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+}
+
 .hero::after {
-  content: '';
-  position: absolute;
   bottom: -30%;
   left: -5%;
   width: 500px;
   height: 500px;
   background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  z-index: 0;
 }
 
 .hero-container {
@@ -46,24 +46,17 @@ const styles = `
 }
 
 .hero-left {
-  animation: slideInLeft 0.8s ease-out;
+  animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .hero-badge {
   display: inline-block;
   padding: 12px 24px;
-  /* Uses the dynamic tag variables from globals.css */
   background: var(--tag-bg);
   color: var(--tag-text);
   border-radius: 50px;
@@ -80,20 +73,16 @@ const styles = `
   font-family: Poppins, sans-serif;
   line-height: 1.2;
   margin: 25px 0;
-  /* Dynamic text color */
   color: var(--text);
   font-weight: 800;
-  transition: color 0.5s ease;
 }
 
 .hero-left p {
   font-size: 1.1rem;
-  /* Dynamic secondary text color */
   color: var(--text-secondary);
   line-height: 1.8;
   margin-bottom: 40px;
   max-width: 100%;
-  transition: color 0.5s ease;
 }
 
 .hero-buttons {
@@ -107,7 +96,7 @@ const styles = `
   padding: 14px 32px;
   border-radius: 12px;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -118,7 +107,7 @@ const styles = `
 }
 
 .button:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-4px) scale(1.03);
 }
 
 .button-primary {
@@ -146,12 +135,10 @@ const styles = `
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  overflow: visible;
 }
 
 .hero-tech span {
   padding: 8px 14px;
-  /* Adapts to light/dark mode surfaces */
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 50px;
@@ -159,7 +146,7 @@ const styles = `
   font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 
@@ -176,36 +163,65 @@ const styles = `
   align-items: center;
   width: 100%;
   gap: 30px;
-  animation: slideInRight 0.8s ease-out;
+  animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
+/* =========================================
+   EDITOR STYLES & TECH ANIMATIONS
+========================================= */
 .editor {
   width: 100%;
   max-width: 650px;
-  /* Kept permanently dark to mimic a real terminal window */
   background: #0a0512;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  
+  /* Subtle "breathing" tech glow on the border */
   border: 1px solid rgba(139, 92, 246, 0.25);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: borderBreathe 4s ease-in-out infinite alternate;
+  
+  will-change: transform, max-width, height, border-radius;
+  transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center; 
 }
 
-.editor:hover {
-  box-shadow: 0 30px 60px rgba(147, 51, 234, 0.15);
+@keyframes borderBreathe {
+  0% { border-color: rgba(139, 92, 246, 0.2); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); }
+  100% { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 25px 60px rgba(139, 92, 246, 0.15); }
+}
+
+.editor:not(.closed):not(.minimized):not(.maximized):hover {
   transform: translateY(-5px);
+}
+
+.editor.closed {
+  max-width: 102px !important;
+  height: 50px !important;
+  border-radius: 50px !important;
+  animation: none; 
+}
+.editor.closed pre {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.editor.minimized {
+  transform: scale(0.5) !important;
+  border-radius: 40px !important;
+}
+
+.editor.maximized {
+  transform: scale(1.08) !important;
+  z-index: 10;
   border-color: var(--primary);
+  animation: none; 
 }
 
 .editor-top {
@@ -216,6 +232,11 @@ const styles = `
   padding: 0 20px;
   background: #130a20;
   border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editor.closed .editor-top {
+  border-bottom: 1px solid transparent; 
 }
 
 .editor-dot {
@@ -223,6 +244,13 @@ const styles = `
   height: 14px;
   border-radius: 50%;
   display: block;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.editor-dot:hover {
+  transform: scale(1.25);
+  filter: brightness(1.3);
 }
 
 .editor-dot.red { background: #ff5f57; }
@@ -237,99 +265,41 @@ const styles = `
   line-height: 1.7;
   margin: 0;
   font-family: 'Courier New', monospace;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* FIXED THIS: 380px forces the window to be full size from the start! */
+  min-height: 380px; 
 }
 
-.editor pre::-webkit-scrollbar {
+/* The Blinking Tech Cursor */
+.cursor {
+  display: inline-block;
   width: 8px;
-  height: 8px;
+  height: 18px;
+  background-color: var(--primary);
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  box-shadow: 0 0 8px var(--primary); 
 }
 
-.editor pre::-webkit-scrollbar-track {
-  background: #0a0512;
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-.editor pre::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 4px;
-}
+.editor pre::-webkit-scrollbar { width: 8px; height: 8px; }
+.editor pre::-webkit-scrollbar-track { background: #0a0512; }
+.editor pre::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
 
-/* TABLET */
 @media (max-width: 900px) {
-  .hero {
-    padding: 80px 20px;
-  }
-  .hero-container {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    text-align: center;
-  }
-  .hero-left {
-    order: 1;
-  }
-  .hero-right {
-    order: 2;
-    width: 100%;
-  }
-  .hero-left h1 {
-    line-height: 1.2;
-  }
-  .hero-left p {
-    margin: auto auto 35px;
-  }
-  .hero-buttons {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  .button {
-    width: 100%;
-  }
-  .hero-tech {
-    justify-content: center;
-  }
-  .editor {
-    width: 100%;
-    max-width: 100%;
-  }
+  .hero-container { grid-template-columns: 1fr; text-align: center; }
+  .hero-left { order: 1; }
+  .hero-right { order: 2; width: 100%; }
 }
-
-/* LARGE MOBILE */
 @media(max-width: 600px) {
-  .hero-left h1 {
-    font-size: 2.2rem;
-  }
-  .hero-badge {
-    font-size: 12px;
-    padding: 10px 18px;
-  }
-  .button {
-    padding: 12px 24px;
-    font-size: 15px;
-  }
-  .editor pre {
-    font-size: 13px;
-    padding: 20px;
-  }
-}
-
-/* SMALL MOBILE */
-@media (max-width: 480px) {
-  .hero {
-    padding: 60px 16px;
-  }
-  .hero-left h1 {
-    font-size: 2rem;
-  }
-  .hero-left p {
-    font-size: 15px;
-  }
-  .hero-badge {
-    padding: 8px 18px;
-  }
-  .editor pre {
-    font-size: 12px;
-    padding: 18px;
-  }
+  .editor.maximized { transform: scale(1.05) !important; } 
+  .editor pre { min-height: 350px; } /* Slightly smaller for mobile */
 }
 `;
 
@@ -341,13 +311,7 @@ const technologies = [
   "Best Practices",
 ];
 
-const editorDots = [
-  { color: "red" },
-  { color: "yellow" },
-  { color: "green" },
-];
-
-const codeSnippet = `{
+const fullCodeSnippet = `{
   "platform": "TechWithTanziya",
   "tagline": "Learn • Code • Grow",
   "mission": "Master programming",
@@ -360,6 +324,60 @@ const codeSnippet = `{
 }`;
 
 export default function Hero() {
+  const [isClosed, setIsClosed] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
+  
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    let i = 0;
+    setDisplayedText(""); 
+    
+    const typingInterval = setInterval(() => {
+      if (i < fullCodeSnippet.length) {
+        setDisplayedText(fullCodeSnippet.substring(0, i + 1));
+        i++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 40); 
+
+    return () => clearInterval(typingInterval);
+  }, []);
+
+  const handleClose = () => {
+    if (isClosed) {
+      setIsClosed(false); 
+    } else {
+      setIsClosed(true);
+      setIsMinimized(false);
+      setIsMaximized(false);
+    }
+  };
+
+  const handleMinimize = () => {
+    if (isMinimized) {
+      setIsMinimized(false); 
+    } else {
+      setIsMinimized(true);
+      setIsClosed(false);
+      setIsMaximized(false);
+    }
+  };
+
+  const handleMaximize = () => {
+    if (isMaximized) {
+      setIsMaximized(false); 
+    } else {
+      setIsMaximized(true);
+      setIsClosed(false);
+      setIsMinimized(false);
+    }
+  };
+
+  const editorClass = `editor ${isClosed ? "closed" : ""} ${isMinimized ? "minimized" : ""} ${isMaximized ? "maximized" : ""}`;
+
   return (
     <>
       <style>{styles}</style>
@@ -399,13 +417,16 @@ export default function Hero() {
           </div>
 
           <div className="hero-right">
-            <div className="editor">
+            <div className={editorClass}>
               <div className="editor-top">
-                {editorDots.map((dot) => (
-                  <span key={dot.color} className={`editor-dot ${dot.color}`}></span>
-                ))}
+                <span className="editor-dot red" onClick={handleClose} title="Close"></span>
+                <span className="editor-dot yellow" onClick={handleMinimize} title="Minimize"></span>
+                <span className="editor-dot green" onClick={handleMaximize} title="Maximize"></span>
               </div>
-              <pre>{codeSnippet}</pre>
+              <pre>
+                {displayedText}
+                <span className="cursor"></span>
+              </pre>
             </div>
           </div>
         </div>
